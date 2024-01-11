@@ -32,4 +32,8 @@
     <ProjectReference Include="..\MarketerSystem.Service\MarketerSystem.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>
