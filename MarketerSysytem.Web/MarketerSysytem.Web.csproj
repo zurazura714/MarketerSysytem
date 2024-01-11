@@ -9,10 +9,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.1" NoWarn="NU1605" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="2.15.2"/>
-    <PackageReference Include="Microsoft.Identity.Web.DownstreamApi" Version="2.15.2"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="2.15.2" />
+    <PackageReference Include="Microsoft.Identity.Web.DownstreamApi" Version="2.15.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MarketerSystem.Abstractions\MarketerSystem.Abstractions.csproj" />
+    <ProjectReference Include="..\MarketerSystem.Common\MarketerSystem.Common.csproj" />
+    <ProjectReference Include="..\MarketerSystem.Data\MarketerSystem.Data.csproj" />
+    <ProjectReference Include="..\MarketerSystem.Repository\MarketerSystem.Repository.csproj" />
+    <ProjectReference Include="..\MarketerSystem.Service\MarketerSystem.Service.csproj" />
   </ItemGroup>
 
 </Project>
