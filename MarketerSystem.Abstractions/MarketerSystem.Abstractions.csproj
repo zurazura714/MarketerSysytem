@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Service\" />
-    <Folder Include="Repository\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MarketerSystem.Common\MarketerSystem.Common.csproj" />
     <ProjectReference Include="..\MarketerSystem.Domain\MarketerSystem.Domain.csproj" />
   </ItemGroup>

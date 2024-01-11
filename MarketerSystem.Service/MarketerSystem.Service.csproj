@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Service\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MarketerSystem.Abstractions\MarketerSystem.Abstractions.csproj" />
     <ProjectReference Include="..\MarketerSystem.Common\MarketerSystem.Common.csproj" />
   </ItemGroup>

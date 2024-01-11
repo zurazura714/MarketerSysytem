@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MarketerSystem.Domain.Model;
 using System;
 using System.Collections.Generic;
 using System.Formats.Tar;
@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MarketerSystem.Data.DBContext
+namespace MarketerSystem.Abstractions.Service
 {
-    public class MarketerDBContext
+    public interface IDistributorService : IServiceBase<Distributor>
     {
     }
 }

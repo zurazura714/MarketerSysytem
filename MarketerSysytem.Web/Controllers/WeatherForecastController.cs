@@ -5,6 +5,7 @@ using Microsoft.Identity.Web.Resource;
 namespace MarketerSysytem.Web.Controllers
 {
     [Authorize]
+    [AllowAnonymous]
     [ApiController]
     [Route("[controller]")]
     [RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]

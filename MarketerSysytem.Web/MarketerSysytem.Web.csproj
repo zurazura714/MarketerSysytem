@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <InvariantGlobalization>false</InvariantGlobalization>
     <UserSecretsId>aspnet-MarketerSysytem.Web-6bdf7714-e305-4d5a-a040-104a53bc1b27</UserSecretsId>
   </PropertyGroup>
 
@@ -30,10 +30,6 @@
     <ProjectReference Include="..\MarketerSystem.Data\MarketerSystem.Data.csproj" />
     <ProjectReference Include="..\MarketerSystem.Repository\MarketerSystem.Repository.csproj" />
     <ProjectReference Include="..\MarketerSystem.Service\MarketerSystem.Service.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>
