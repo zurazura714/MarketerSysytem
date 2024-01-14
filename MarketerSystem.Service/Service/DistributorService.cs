@@ -12,7 +12,7 @@ namespace MarketerSystem.Service.Service
 {
     public class DistributorService : ServiceBase<Distributor, IDistributorRepository>, IDistributorService
     {
-        public DistributorService(IUnitOfWork context, IDistributorRepository taskFileRepository) : base(context, taskFileRepository)
+        public DistributorService(IUnitOfWork context, IDistributorRepository distributorRepository) : base(context, distributorRepository)
         {
         }
     }

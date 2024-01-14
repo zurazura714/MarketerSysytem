@@ -8,7 +8,8 @@ namespace MarketerSysytem.Web.Profiles
     {
         public DistributorProfile()
         {
-            CreateMap<Distributor, DistributorDTO>().ReverseMap();
+            CreateMap<Distributor, DistributorDTO>();
+            CreateMap<Distributor, DistributorCreateDTO>().ReverseMap();
         }
     }
 }

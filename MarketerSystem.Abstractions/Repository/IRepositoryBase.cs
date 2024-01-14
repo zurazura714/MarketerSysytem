@@ -10,16 +10,16 @@ namespace MarketerSystem.Abstractions.Repository
     {
         IUnitOfWork Context { get; }
 
-        void Add(TEntity entity);
+        Task AddAsync(TEntity entity);
 
-        TEntity Fetch(int id);
+        Task<TEntity> FetchAsync(int id);
 
-        IEnumerable<TEntity> Set();
+        Task<IEnumerable<TEntity>> SetAsync();
 
-        void Save(TEntity entity);
+        Task SaveAsync(TEntity entity);
 
-        void Delete(int id);
+        Task DeleteAsync(int id);
 
-        void Delete(TEntity entity);
+        Task DeleteAsync(TEntity entity);
     }
 }

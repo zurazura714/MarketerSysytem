@@ -40,12 +40,12 @@ namespace MarketerSystem.Domain.Model
         public Distributor Recomendator { get; set; }
 
 
-        public ICollection<Picture> Pictures { get; set; }
+        public virtual ICollection<Picture>? Pictures { get; set; }
         [Required]
-        public ICollection<ContactInfo> ContactInfos { get; set; }
+        public virtual ICollection<ContactInfo> ContactInfos { get; set; }
         [Required]
-        public ICollection<Address> Addresses { get; set; }
-        public ICollection<BonusPayment> BonusPayments { get; set; }
+        public virtual ICollection<Address> Addresses { get; set; }
+        public virtual ICollection<BonusPayment> BonusPayments { get; set; }
 
     }
 }

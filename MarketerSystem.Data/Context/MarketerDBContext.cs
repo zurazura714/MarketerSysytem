@@ -1,4 +1,5 @@
 ﻿using MarketerSystem.Abstractions.Repository;
+using MarketerSystem.Common.Enums;
 using MarketerSystem.Domain.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -87,7 +88,8 @@ namespace MarketerSystem.Data.Context
                     FirstName = "Zura",
                     LastName = "Samkharadze",
                     BirthDate = new DateTime(1990, 1, 18),
-                    GenerationLinker = null
+                    GenerationLinker = null,
+                    PassportID = 1,
                 },
                 new Distributor
                 {
@@ -96,7 +98,8 @@ namespace MarketerSystem.Data.Context
                     Gender = Common.Enums.Gender.Female,
                     FirstName = "Maiko",
                     LastName = "Samkharadze",
-                    GenerationLinker = null
+                    GenerationLinker = null, 
+                    PassportID = 2
                 });
 
 
@@ -159,14 +162,14 @@ namespace MarketerSystem.Data.Context
                 });
         }
 
-        public void Commit()
+        public async Task CommitAsync()
         {
-            SaveChanges();
+            await SaveChangesAsync();
         }
 
-        public void Rollback()
+        public async Task RollbackAsync()
         {
-            Rollback();
+            await RollbackAsync();
         }
     }
 }

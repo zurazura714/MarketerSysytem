@@ -13,6 +13,6 @@ namespace MarketerSystem.Domain.Model
 
         [ForeignKey(nameof(Distributor))]
         public int DistributorID { get; set;}
-        public Distributor Distributor { get; set;}
+        public virtual Distributor Distributor { get; set;}
     }
 }

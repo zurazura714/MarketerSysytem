@@ -9,12 +9,12 @@
     }
   },
   "profiles": {
-    "http": {
+    "MarketerSystem.Web": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "launchUrl": "weatherforecast",
-      "applicationUrl": "http://localhost:5080",
+      "launchUrl": "swagger",
+      "applicationUrl": "http://localhost:5023",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

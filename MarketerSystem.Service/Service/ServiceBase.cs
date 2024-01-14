@@ -9,48 +9,53 @@ using System.Threading.Tasks;
 namespace MarketerSystem.Service.Service
 {
     public abstract class ServiceBase<TEntity, TRepository> : IServiceBase<TEntity>
-        where TEntity : class
-        where TRepository : IRepositoryBase<TEntity>
+    where TEntity : class
+    where TRepository : IRepositoryBase<TEntity>
     {
         protected IUnitOfWork _context;
         protected TRepository _repository;
 
         internal ServiceBase(IUnitOfWork context, TRepository repository)
         {
-            _context = context ?? throw new ArgumentNullException("context");
-            if (repository == null) throw new ArgumentNullException("repository");
-            _repository = repository;
-        }
-        public TEntity Fetch(int id)
-        {
-            return _repository.Fetch(id);
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public IEnumerable<TEntity> Set()
+        public virtual async Task<TEntity> FetchAsync(int id)
         {
-            return _repository.Set();
+            return await _repository.FetchAsync(id);
         }
 
-        public void Save(TEntity entity)
+        public virtual async Task<IEnumerable<TEntity>> SetAsync()
         {
-            _repository.Save(entity);
-            _context.Commit();
-        }
-        public void SaveChanges()
-        {
-            _context.Commit();
+            return await _repository.SetAsync();
         }
 
-        public void Delete(int id)
+        public virtual async Task SaveAsync(TEntity entity)
         {
-            _repository.Delete(id);
-            _context.Commit();
+            await _repository.SaveAsync(entity);
+            await _context.CommitAsync();
         }
 
-        public void Delete(TEntity entity)
+        public virtual async Task SaveChangesAsync()
         {
-            _repository.Delete(entity);
-            _context.Commit();
+            await _context.CommitAsync();
+        }
+
+        public virtual async Task DeleteAsync(int id)
+        {
+            var entity = await _repository.FetchAsync(id);
+            if (entity != null)
+            {
+                await _repository.DeleteAsync(entity);
+                await _context.CommitAsync();
+            }
+        }
+
+        public virtual async Task DeleteAsync(TEntity entity)
+        {
+            await _repository.DeleteAsync(entity);
+            await _context.CommitAsync();
         }
     }
 }

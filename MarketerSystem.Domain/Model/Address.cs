@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MarketerSystem.Common.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MarketerSystem.Domain.Model
@@ -14,6 +15,6 @@ namespace MarketerSystem.Domain.Model
         [Required]
         public int DistributorID { get; set; }
         [ForeignKey(nameof(DistributorID))]
-        public Distributor Distributor { get; set; }
+        public virtual Distributor Distributor { get; set; }
     }
 }

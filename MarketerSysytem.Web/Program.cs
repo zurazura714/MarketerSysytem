@@ -17,12 +17,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+});
 
 builder.Services.AddDbContext<MarketerDBContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("MarketerDBContext")));
 
-AddAuth(builder.Services);
+AddRepositoriesAndServices(builder.Services);
 
 var app = builder.Build();
 
@@ -40,7 +43,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
-app.MapControllers();
+app.MapControllers(); 
 
 app.Run();
 
@@ -56,26 +59,6 @@ static void UpdateDatabase(IApplicationBuilder app)
     }
 }
 
-static void AddAuth(IServiceCollection services)
-{
-    services.AddAuthentication(
-    CookieAuthenticationDefaults.AuthenticationScheme)
-        .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
-    options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-    });
-
-    // authentication 
-    services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    });
-
-}
-
-
 static void AddRepositoriesAndServices(IServiceCollection services)
 {
     services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -83,12 +66,14 @@ static void AddRepositoriesAndServices(IServiceCollection services)
     services.AddScoped<IUnitOfWork, MarketerDBContext>();
 
     services.AddScoped<IDistributorRepository, DistributorRepository>();
-    //services.AddScoped<ITaskFileRepository, TaskFileRepository>();
-    //services.AddScoped<IUserRepository, UserRepository>();
-    //services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+    services.AddScoped<IPictureRepository, PictureRepository>();
+    services.AddScoped<IContactInfoRepository, ContactInfoRepository>();
+    services.AddScoped<IAddressRepository, AddressRepository>();
+    services.AddScoped<IPassportRepository, PassportRepository>();
 
     services.AddScoped<IDistributorService, DistributorService>();
-    //services.AddScoped<ITaskFileService, TaskFileService>();
-    //services.AddScoped<IUserService, UserService>();
-    //services.AddScoped<IUserRoleService, UserRoleService>();
+    services.AddScoped<IPictureService, PictureService>();
+    services.AddScoped<IContactInfoService, ContactInfoService>();
+    services.AddScoped<IAddressService, AddressService>();
+    services.AddScoped<IPassportService, PassportService>();
 }

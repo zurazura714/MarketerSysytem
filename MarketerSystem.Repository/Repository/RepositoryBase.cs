@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace MarketerSystem.Repository.Repository
 {
+
     public abstract class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : class
     {
         protected MarketerDBContext _context;
@@ -22,57 +23,62 @@ namespace MarketerSystem.Repository.Repository
 
         internal RepositoryBase(MarketerDBContext context)
         {
-            if (context == null) throw new ArgumentNullException("context");
+            if (context == null) throw new ArgumentNullException(nameof(context));
 
             _context = context;
         }
 
-        public virtual TEntity Fetch(int id)
+        public virtual async Task<TEntity> FetchAsync(int id)
         {
-            return _context.Set<TEntity>().Find(id);
+            return await _context.Set<TEntity>().FindAsync(id);
         }
 
-        public virtual IEnumerable<TEntity> Set()
+        public virtual async Task<IEnumerable<TEntity>> SetAsync()
         {
-            return _context.Set<TEntity>();
-        }
-        public virtual void Add(TEntity entity)
-        {
-            Add(_context.Set<TEntity>(), entity);
+            return await _context.Set<TEntity>().ToListAsync();
         }
 
-        public virtual void Save(TEntity entity)
+        public virtual async Task AddAsync(TEntity entity)
         {
-            Save(_context.Set<TEntity>(), entity);
+            await AddAsync(_context.Set<TEntity>(), entity);
         }
 
-        public virtual void Delete(int id)
+        public virtual async Task SaveAsync(TEntity entity)
         {
-            Delete(Fetch(id));
+            await SaveAsync(_context.Set<TEntity>(), entity);
         }
 
-        public virtual void Delete(TEntity entity)
+        public virtual async Task DeleteAsync(int id)
         {
-            Delete(_context.Set<TEntity>(), entity);
+            var entity = await FetchAsync(id);
+            await DeleteAsync(entity);
         }
 
-        protected virtual void Save(DbSet<TEntity> set, TEntity entity)
+        public virtual async Task DeleteAsync(TEntity entity)
         {
-            var entry = _context.Entry(entity);
-            if (entry == null || entry.State == EntityState.Detached) set.Add(entity);
+            await DeleteAsync(_context.Set<TEntity>(), entity);
         }
 
-        protected virtual void Delete(DbSet<TEntity> set, TEntity entity)
-        {
-            set.Remove(entity);
-        }
-
-        protected virtual void Add(DbSet<TEntity> set, TEntity entity)
+        protected virtual async Task SaveAsync(DbSet<TEntity> set, TEntity entity)
         {
             var entry = _context.Entry(entity);
             if (entry == null || entry.State == EntityState.Detached)
             {
-                set.Add(entity);
+                await set.AddAsync(entity);
+            }
+        }
+
+        protected virtual async Task DeleteAsync(DbSet<TEntity> set, TEntity entity)
+        {
+            set.Remove(entity);
+        }
+
+        protected virtual async Task AddAsync(DbSet<TEntity> set, TEntity entity)
+        {
+            var entry = _context.Entry(entity);
+            if (entry == null || entry.State == EntityState.Detached)
+            {
+                await set.AddAsync(entity);
             }
         }
     }
