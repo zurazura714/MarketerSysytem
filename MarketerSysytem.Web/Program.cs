@@ -1,4 +1,8 @@
+using MarketerSystem.Abstractions.Repository;
+using MarketerSystem.Abstractions.Service;
 using MarketerSystem.Data.Context;
+using MarketerSystem.Repository.Repository;
+using MarketerSystem.Service.Service;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -69,4 +73,22 @@ static void AddAuth(IServiceCollection services)
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     });
 
+}
+
+
+static void AddRepositoriesAndServices(IServiceCollection services)
+{
+    services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+    services.AddScoped<IUnitOfWork, MarketerDBContext>();
+
+    services.AddScoped<IDistributorRepository, DistributorRepository>();
+    //services.AddScoped<ITaskFileRepository, TaskFileRepository>();
+    //services.AddScoped<IUserRepository, UserRepository>();
+    //services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+
+    services.AddScoped<IDistributorService, DistributorService>();
+    //services.AddScoped<ITaskFileService, TaskFileService>();
+    //services.AddScoped<IUserService, UserService>();
+    //services.AddScoped<IUserRoleService, UserRoleService>();
 }

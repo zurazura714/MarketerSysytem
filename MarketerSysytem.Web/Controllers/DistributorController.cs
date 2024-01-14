@@ -1,12 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using MarketerSystem.Abstractions.Service;
+using MarketerSystem.Common.DTO;
+using MarketerSystem.Domain.ResourceParameters;
+using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace MarketerSysytem.Web.Controllers
 {
-    public class DistributorController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public  class DistributorController : Controller
     {
-        public IActionResult Index()
+        private readonly IMapper _mapper;
+        private readonly IDistributorService _distributorService;
+        public DistributorController(IMapper mapper, IDistributorService distributorService)
         {
-            return View();
+            _distributorService = distributorService;
+            _mapper = mapper;
         }
+
+        
+
     }
 }

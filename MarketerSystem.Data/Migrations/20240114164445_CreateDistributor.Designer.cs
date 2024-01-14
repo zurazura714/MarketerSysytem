@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MarketerSystem.Data.Migrations
 {
     [DbContext(typeof(MarketerDBContext))]
-    [Migration("20240111185130_FinishModel")]
-    partial class FinishModel
+    [Migration("20240114164445_CreateDistributor")]
+    partial class CreateDistributor
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,6 +49,22 @@ namespace MarketerSystem.Data.Migrations
                     b.HasIndex("DistributorID");
 
                     b.ToTable("Addresses");
+
+                    b.HasData(
+                        new
+                        {
+                            ID = 1,
+                            AddressInfo = "საჯაიას 10",
+                            AddressType = 1,
+                            DistributorID = 1
+                        },
+                        new
+                        {
+                            ID = 2,
+                            AddressInfo = "ბოხუას 10",
+                            AddressType = 2,
+                            DistributorID = 2
+                        });
                 });
 
             modelBuilder.Entity("MarketerSystem.Domain.Model.BonusPayment", b =>
@@ -102,6 +118,22 @@ namespace MarketerSystem.Data.Migrations
                     b.HasIndex("DistributorID");
 
                     b.ToTable("ContactInfo");
+
+                    b.HasData(
+                        new
+                        {
+                            ID = 1,
+                            ContactInformationType = 2,
+                            DistributorID = 1,
+                            Information = "599473377"
+                        },
+                        new
+                        {
+                            ID = 2,
+                            ContactInformationType = 3,
+                            DistributorID = 2,
+                            Information = "MaikoMaiko@Gmail.com"
+                        });
                 });
 
             modelBuilder.Entity("MarketerSystem.Domain.Model.Distributor", b =>
@@ -127,7 +159,6 @@ namespace MarketerSystem.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("GenerationLinker")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -139,9 +170,6 @@ namespace MarketerSystem.Data.Migrations
                     b.Property<int>("PassportID")
                         .HasColumnType("int");
 
-                    b.Property<int>("PictureId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("RecomendatorID")
                         .HasColumnType("int");
 
@@ -150,13 +178,31 @@ namespace MarketerSystem.Data.Migrations
                     b.HasIndex("DistributorGuid")
                         .IsUnique();
 
-                    b.HasIndex("PassportID");
-
-                    b.HasIndex("PictureId");
-
                     b.HasIndex("RecomendatorID");
 
                     b.ToTable("Distributors");
+
+                    b.HasData(
+                        new
+                        {
+                            DistributorID = 1,
+                            BirthDate = new DateTime(1990, 1, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DistributorGuid = new Guid("5448182b-8909-4ad2-9be0-1e5f2097aed5"),
+                            FirstName = "Zura",
+                            Gender = 1,
+                            LastName = "Samkharadze",
+                            PassportID = 0
+                        },
+                        new
+                        {
+                            DistributorID = 2,
+                            BirthDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DistributorGuid = new Guid("2a65fe94-3e4d-4f3c-95ee-eb1998783ef6"),
+                            FirstName = "Maiko",
+                            Gender = 2,
+                            LastName = "Samkharadze",
+                            PassportID = 0
+                        });
                 });
 
             modelBuilder.Entity("MarketerSystem.Domain.Model.Passport", b =>
@@ -166,6 +212,9 @@ namespace MarketerSystem.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("DistributorID")
+                        .HasColumnType("int");
 
                     b.Property<string>("DocumentNumber")
                         .IsRequired()
@@ -198,31 +247,36 @@ namespace MarketerSystem.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Passport");
-                });
+                    b.HasIndex("DistributorID")
+                        .IsUnique();
 
-            modelBuilder.Entity("MarketerSystem.Domain.Model.Picture", b =>
-                {
-                    b.Property<int>("PictureId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.ToTable("Passports");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PictureId"));
-
-                    b.Property<byte[]>("Content")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("UploadTime")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("PictureId");
-
-                    b.ToTable("Picture");
+                    b.HasData(
+                        new
+                        {
+                            ID = 1,
+                            DistributorID = 1,
+                            DocumentNumber = "102340",
+                            DocumentSerie = "11111",
+                            DocumentType = 1,
+                            ExpirationDate = new DateTimeOffset(new DateTime(2028, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 4, 0, 0, 0)),
+                            IssuingAgency = "SA Agency",
+                            PersonalNumber = "01008048552",
+                            ReleaseDate = new DateTimeOffset(new DateTime(2024, 1, 14, 20, 44, 44, 875, DateTimeKind.Unspecified).AddTicks(9418), new TimeSpan(0, 4, 0, 0, 0))
+                        },
+                        new
+                        {
+                            ID = 2,
+                            DistributorID = 2,
+                            DocumentNumber = "102340",
+                            DocumentSerie = "11111",
+                            DocumentType = 1,
+                            ExpirationDate = new DateTimeOffset(new DateTime(2028, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 4, 0, 0, 0)),
+                            IssuingAgency = "SA Agency",
+                            PersonalNumber = "599473377",
+                            ReleaseDate = new DateTimeOffset(new DateTime(2024, 1, 14, 20, 44, 44, 875, DateTimeKind.Unspecified).AddTicks(9430), new TimeSpan(0, 4, 0, 0, 0))
+                        });
                 });
 
             modelBuilder.Entity("MarketerSystem.Domain.Model.Product", b =>
@@ -244,6 +298,32 @@ namespace MarketerSystem.Data.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Products");
+
+                    b.HasData(
+                        new
+                        {
+                            ID = 1,
+                            Name = "Pen",
+                            Price = 10m
+                        },
+                        new
+                        {
+                            ID = 2,
+                            Name = "Pencil",
+                            Price = 9m
+                        },
+                        new
+                        {
+                            ID = 3,
+                            Name = "Book",
+                            Price = 20m
+                        },
+                        new
+                        {
+                            ID = 4,
+                            Name = "Notepad",
+                            Price = 14m
+                        });
                 });
 
             modelBuilder.Entity("MarketerSystem.Domain.Model.Sell", b =>
@@ -316,27 +396,22 @@ namespace MarketerSystem.Data.Migrations
 
             modelBuilder.Entity("MarketerSystem.Domain.Model.Distributor", b =>
                 {
-                    b.HasOne("MarketerSystem.Domain.Model.Passport", "Passport")
-                        .WithMany()
-                        .HasForeignKey("PassportID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MarketerSystem.Domain.Model.Picture", "Picture")
-                        .WithMany()
-                        .HasForeignKey("PictureId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("MarketerSystem.Domain.Model.Distributor", "Recomendator")
                         .WithMany()
                         .HasForeignKey("RecomendatorID");
 
-                    b.Navigation("Passport");
-
-                    b.Navigation("Picture");
-
                     b.Navigation("Recomendator");
+                });
+
+            modelBuilder.Entity("MarketerSystem.Domain.Model.Passport", b =>
+                {
+                    b.HasOne("MarketerSystem.Domain.Model.Distributor", "Distributor")
+                        .WithOne("Passport")
+                        .HasForeignKey("MarketerSystem.Domain.Model.Passport", "DistributorID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Distributor");
                 });
 
             modelBuilder.Entity("MarketerSystem.Domain.Model.Sell", b =>
@@ -365,6 +440,9 @@ namespace MarketerSystem.Data.Migrations
                     b.Navigation("BonusPayments");
 
                     b.Navigation("ContactInfos");
+
+                    b.Navigation("Passport")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

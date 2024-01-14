@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MarketerSystem.Common.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -24,38 +25,27 @@ namespace MarketerSystem.Domain.Model
         public DateTime BirthDate { get; set; }
         [Required]
         public Gender Gender { get; set; }
-        public Picture Picture { get; set; }
+
+
+        [ForeignKey(nameof(Passport))]
+        public int PassportID { get; set; }
         public Passport Passport { get; set; }
 
 
         [MaxLength(50)]
-        public string GenerationLinker { get; set; }
+        public string? GenerationLinker { get; set; }
 
         [ForeignKey(nameof(DistributorID))]
         public int? RecomendatorID { get; set; }
         public Distributor Recomendator { get; set; }
 
 
+        public ICollection<Picture> Pictures { get; set; }
         [Required]
         public ICollection<ContactInfo> ContactInfos { get; set; }
         [Required]
         public ICollection<Address> Addresses { get; set; }
         public ICollection<BonusPayment> BonusPayments { get; set; }
-
-    }
-    public class BonusPayment
-    {
-        [Key]
-        public int ID { get; set; }
-        [Required]
-        public decimal BonusPay { get; set; }
-        public DateTimeOffset FromDate { get; set; }
-        public DateTimeOffset ToDate { get; set; }
-
-        [ForeignKey(nameof(Distributor))]
-        public int DistributorID { get; set; }
-
-        public Distributor Distributor { get; set; }
 
     }
 }

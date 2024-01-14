@@ -4,6 +4,7 @@ using MarketerSystem.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MarketerSystem.Data.Migrations
 {
     [DbContext(typeof(MarketerDBContext))]
-    partial class MarketerDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240114164706_AddPictures")]
+    partial class AddPictures
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -184,7 +187,7 @@ namespace MarketerSystem.Data.Migrations
                         {
                             DistributorID = 1,
                             BirthDate = new DateTime(1990, 1, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DistributorGuid = new Guid("c5468775-2de3-41b8-8a97-bbe37fda3209"),
+                            DistributorGuid = new Guid("20be1849-eb96-4d11-8016-a4da2f8658cc"),
                             FirstName = "Zura",
                             Gender = 1,
                             LastName = "Samkharadze",
@@ -194,7 +197,7 @@ namespace MarketerSystem.Data.Migrations
                         {
                             DistributorID = 2,
                             BirthDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DistributorGuid = new Guid("fc487ea2-9bc8-4ca3-8283-f05f28dd7980"),
+                            DistributorGuid = new Guid("0f794ec4-612d-4311-98b4-5b3d82cff52a"),
                             FirstName = "Maiko",
                             Gender = 2,
                             LastName = "Samkharadze",
@@ -260,7 +263,7 @@ namespace MarketerSystem.Data.Migrations
                             ExpirationDate = new DateTimeOffset(new DateTime(2028, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 4, 0, 0, 0)),
                             IssuingAgency = "SA Agency",
                             PersonalNumber = "01008048552",
-                            ReleaseDate = new DateTimeOffset(new DateTime(2024, 1, 14, 20, 51, 12, 785, DateTimeKind.Unspecified).AddTicks(7677), new TimeSpan(0, 4, 0, 0, 0))
+                            ReleaseDate = new DateTimeOffset(new DateTime(2024, 1, 14, 20, 47, 6, 29, DateTimeKind.Unspecified).AddTicks(6750), new TimeSpan(0, 4, 0, 0, 0))
                         },
                         new
                         {
@@ -272,7 +275,7 @@ namespace MarketerSystem.Data.Migrations
                             ExpirationDate = new DateTimeOffset(new DateTime(2028, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 4, 0, 0, 0)),
                             IssuingAgency = "SA Agency",
                             PersonalNumber = "599473377",
-                            ReleaseDate = new DateTimeOffset(new DateTime(2024, 1, 14, 20, 51, 12, 785, DateTimeKind.Unspecified).AddTicks(7686), new TimeSpan(0, 4, 0, 0, 0))
+                            ReleaseDate = new DateTimeOffset(new DateTime(2024, 1, 14, 20, 47, 6, 29, DateTimeKind.Unspecified).AddTicks(6762), new TimeSpan(0, 4, 0, 0, 0))
                         });
                 });
 
@@ -302,7 +305,7 @@ namespace MarketerSystem.Data.Migrations
 
                     b.HasIndex("DistributorID");
 
-                    b.ToTable("Pictures");
+                    b.ToTable("Picture");
                 });
 
             modelBuilder.Entity("MarketerSystem.Domain.Model.Product", b =>

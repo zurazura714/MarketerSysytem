@@ -21,5 +21,8 @@ namespace MarketerSystem.Domain.Model
         [MaxLength(100)]
         public string IssuingAgency { get; set;}
 
+        public int DistributorID { get; set; }
+        public Distributor Distributor { get; set; }
+
     }
 }
