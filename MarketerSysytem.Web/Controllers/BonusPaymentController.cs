@@ -73,7 +73,7 @@ namespace MarketerSysytem.Web.Controllers
                 currentLevel = Array.IndexOf(elements, distributorId);
                 if (currentLevel < elements.Length)
                 {
-                    decimal bonusPercentage = GetBonusPercentage(currentLevel+1);
+                    decimal bonusPercentage = GetBonusPercentage(currentLevel);
 
                     var bonusPaymentForRecommender = new BonusPayment
                     {

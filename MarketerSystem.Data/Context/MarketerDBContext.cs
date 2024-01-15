@@ -160,6 +160,28 @@ namespace MarketerSystem.Data.Context
                     ContactInformationType = ContactInformationType.Email,
                     Information = "MaikoMaiko@Gmail.com"
                 });
+            modelBuilder.Entity<Sell>().HasData(
+                new Sell()
+                {
+                    ID = 1,
+                    ProductID = 1,
+                    DistributorID = 1,
+                    ProductPrice = 10,
+                    ProductTotalPrice = 10,
+                    ProductUnitPrice = 10,
+                    SoldDate = DateTime.Now,
+                });
+            modelBuilder.Entity<BonusPayment>().HasData(
+                new BonusPayment()
+                {
+                    ID = 1,
+                    BonusPay = 10,
+                    DistributorID = 1,
+                    FromDate = DateTime.Now.AddHours(-5),
+                    ToDate = DateTime.Now,
+                });
+
+
         }
 
         public async Task CommitAsync()
