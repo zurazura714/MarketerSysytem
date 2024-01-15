@@ -51,7 +51,7 @@ namespace MarketerSystem.Data.Context
             .HasForeignKey(a => a.DistributorID)
             .HasPrincipalKey(d => d.DistributorID);
 
-
+         
             //Seed DB
             modelBuilder.Entity<Product>().HasData(
                 new Product()

@@ -37,7 +37,7 @@ namespace MarketerSystem.Domain.Model
 
         [ForeignKey(nameof(DistributorID))]
         public int? RecomendatorID { get; set; }
-        public Distributor Recomendator { get; set; }
+        public virtual Distributor Recomendator { get; set; }
 
 
         public virtual ICollection<Picture>? Pictures { get; set; }
