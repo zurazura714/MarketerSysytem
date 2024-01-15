@@ -14,10 +14,14 @@ namespace MarketerSysytem.Web.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ISellService _sellService;
-        public SellController(IMapper mapper, ISellService sellService)
+        private readonly IDistributorService _distributorService;
+        private readonly IProductService _productService;
+        public SellController(IMapper mapper, ISellService sellService, IDistributorService distributorService, IProductService productService)
         {
             _mapper = mapper;
             _sellService = sellService;
+            _distributorService = distributorService;
+            _productService = productService;
         }
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SellDTO>>> GetSoldProductsAsync([FromQuery] SellResourceParameters sellResourceParameters )
@@ -34,10 +38,14 @@ namespace MarketerSysytem.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SellProductAsync(SellDTO sellDTO)
+        public async Task<IActionResult> SellProductAsync(SellCreateDTO sellDTO)
         {
             var sellEntity = _mapper.Map<Sell>(sellDTO);
-
+            sellEntity.Product = await _productService.FetchAsync(sellEntity.ProductID);
+            sellEntity.Distributor = await _distributorService.FetchAsync(sellEntity.DistributorID);
+            sellEntity.ProductPrice = sellEntity.Product.Price;
+            sellEntity.ProductTotalPrice = sellEntity.Product.Price;
+            sellEntity.ProductUnitPrice = sellEntity.Product.Price;
             await _sellService.SaveAsync(sellEntity);
 
             var soldProduct = _mapper.Map<SellDTO>(sellEntity);

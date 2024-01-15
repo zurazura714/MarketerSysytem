@@ -29,7 +29,7 @@ namespace MarketerSysytem.Web.Controllers
         public async Task<ActionResult<IEnumerable<BonusPaymentDTO>>> GetSoldProductsAsync([FromQuery] PaymentParameters paramseters)
         {
             var soldProducts = (await _sellService.SetAsync())
-            .Where(a => a.SoldDate >= paramseters.FromDate && a.SoldDate <= paramseters.Todate).ToList();
+            .Where(a => a.SoldDate >= paramseters.FromDate && a.SoldDate <= paramseters.Todate && !a.UsedForPayment).ToList();
 
             foreach (var soldProduct in soldProducts)
             {
@@ -73,7 +73,7 @@ namespace MarketerSysytem.Web.Controllers
                 currentLevel = Array.IndexOf(elements, distributorId);
                 if (currentLevel < elements.Length)
                 {
-                    decimal bonusPercentage = GetBonusPercentage(currentLevel);
+                    decimal bonusPercentage = GetBonusPercentage(currentLevel+1);
 
                     var bonusPaymentForRecommender = new BonusPayment
                     {

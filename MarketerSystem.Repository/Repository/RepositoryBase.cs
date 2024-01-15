@@ -35,7 +35,7 @@ namespace MarketerSystem.Repository.Repository
 
         public virtual async Task<IEnumerable<TEntity>> SetAsync()
         {
-            return await _context.Set<TEntity>().ToListAsync();
+            return await Task.FromResult(_context.Set<TEntity>());
         }
 
         public virtual async Task AddAsync(TEntity entity)

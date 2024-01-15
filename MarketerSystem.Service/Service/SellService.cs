@@ -20,9 +20,11 @@ namespace MarketerSystem.Service.Service
             }
 
             var soldProducts = (await SetAsync())
-                .Where(a => a.ProductID == parameters.ProductID ||
-                a.DistributorID == parameters.DistributorID ||
-                a.SoldDate == parameters.SoldDate).ToList();
+                .Where(a =>
+                    (parameters.ProductID == null || a.ProductID == parameters.ProductID) &&
+                    (parameters.DistributorID == null || a.DistributorID == parameters.DistributorID) &&
+                    (parameters.SoldDate == null || a.SoldDate == parameters.SoldDate))
+                .ToList();
 
             return soldProducts;
         }

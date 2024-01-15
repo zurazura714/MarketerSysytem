@@ -9,6 +9,14 @@ namespace MarketerSysytem.Web.Profiles
         public SellProfile()
         {
             CreateMap<Sell, SellDTO>();
+            CreateMap<Sell, SellCreateDTO>().ReverseMap();
+        }
+    }
+    public partial class BonusPaymentProfile : Profile
+    {
+        public BonusPaymentProfile()
+        {
+            CreateMap<BonusPayment, BonusPaymentDTO>();
         }
     }
 }

@@ -2,6 +2,8 @@
 using MarketerSystem.Abstractions.Service;
 using MarketerSystem.Domain.Model;
 using MarketerSystem.Domain.ResourceParameters;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace MarketerSystem.Service.Service
 {
@@ -18,11 +20,15 @@ namespace MarketerSystem.Service.Service
                 throw new ArgumentNullException(nameof(PaymentParameters));
             }
 
-            var payments = (await SetAsync())
-                .Where(a => (parameters.MinPrice <= a.BonusPay ||
-                parameters.MaxPrice >= a.BonusPay ||
-                parameters.Name.Contains(a.Distributor.FirstName) ||
-                parameters.LastName.Contains(a.Distributor.LastName))).ToList();
+            var payments = (await SetAsync()).AsQueryable().Include(a => a.Distributor)
+                .Where(a =>
+                    (parameters.MinPrice == null || parameters.MinPrice <= a.BonusPay) &&
+                    (parameters.MaxPrice == null || parameters.MaxPrice >= a.BonusPay)
+                    &&
+                    (parameters.Name == null || a.Distributor.FirstName.Contains(parameters.Name)) &&
+                    (parameters.LastName == null || a.Distributor.LastName.Contains(parameters.LastName))
+                    )
+                .ToList();
 
             return payments;
         }
