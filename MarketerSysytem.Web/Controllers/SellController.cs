@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MarketerSysytem.Web.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class SellController : Controller
     {
         private readonly IMapper _mapper;

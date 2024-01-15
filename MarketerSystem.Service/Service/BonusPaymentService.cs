@@ -26,15 +26,6 @@ namespace MarketerSystem.Service.Service
 
             return payments;
         }
-        public async Task<List<BonusPayment>> PaymentsDistributors(PaymentParameters parameters)
-        {
-            if (parameters == null)
-            {
-                throw new ArgumentNullException(nameof(PaymentParameters));
-            }
-
-            return null;
-        }
             
     }
 }

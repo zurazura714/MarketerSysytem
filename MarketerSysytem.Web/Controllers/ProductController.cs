@@ -7,6 +7,8 @@ using System.Text;
 
 namespace MarketerSysytem.Web.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class ProductController : Controller
     {
         private readonly IMapper _mapper;
@@ -27,7 +29,6 @@ namespace MarketerSysytem.Web.Controllers
 
 
         [HttpGet("{id}", Name = "GetProduct")]
-        [HttpHead]
         public async Task<IActionResult> GetProductAsync(int id)
         {
             var product = await _productService.FetchAsync(id);
