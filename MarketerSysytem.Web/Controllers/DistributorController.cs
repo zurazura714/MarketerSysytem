@@ -53,7 +53,7 @@ namespace MarketerSysytem.Web.Controllers
 
         [HttpGet("{id}", Name = "GetDistributor")]
         [HttpHead]
-        public async Task<IActionResult> GetDistributor(int id)
+        public async Task<IActionResult> GetDistributorAsync(int id)
         {
             var distributor = await _distributorService.FetchAsync(id);
             if (distributor == null)
@@ -72,7 +72,7 @@ namespace MarketerSysytem.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateDistributor(DistributorCreateDTO distributorDTO)
+        public async Task<IActionResult> CreateDistributorAsync(DistributorCreateDTO distributorDTO)
         {
             var distributorEntity = _mapper.Map<Distributor>(distributorDTO);
             distributorEntity.DistributorGuid = Guid.NewGuid();
@@ -99,6 +99,75 @@ namespace MarketerSysytem.Web.Controllers
             return CreatedAtRoute("GetDistributor",
                 new { id = distributorReturn.DistributorID },
                 distributorReturn);
+        }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateDistributorAsync(int id, DistributorCreateDTO distributorDTO)
+        {
+            var distributor = await _distributorService.FetchAsync(id);
+            if (distributor == null)
+            {
+                return NotFound();
+            }
+            distributor.FirstName = distributorDTO.FirstName;
+            distributor.LastName = distributorDTO.LastName;
+            distributor.BirthDate = distributorDTO.BirthDate;
+            distributor.BirthDate = distributorDTO.BirthDate;
+            distributor.Gender = distributorDTO.Gender;
+
+            distributor.Passport = await _passportService.FetchAsync(distributor.PassportID);
+            distributor.Addresses = (await _addressService.SetAsync())
+                .Where(a => a.DistributorID == distributor.DistributorID).ToList();
+            distributor.ContactInfos = (await _contactInfoService.SetAsync())
+                .Where(a => a.DistributorID == distributor.DistributorID).ToList();
+            if (distributor.Addresses == null)
+            {
+                foreach (var address in distributorDTO.Addresses)
+                {
+                    var addr = _mapper.Map<Address>(address);
+                    _addressService.SaveAsync(addr);
+                }
+            }
+            else
+            {
+                distributor.Addresses = _mapper.Map<List<Address>>(distributorDTO.Addresses);
+            }
+            if (distributor.ContactInfos == null)
+            {
+                foreach (var contactInfo in distributorDTO.ContactInfos)
+                {
+                    var contact = _mapper.Map<ContactInfo>(contactInfo);
+                    _contactInfoService.SaveAsync(contact);
+                }
+            }
+            else
+            {
+                distributor.Pictures = _mapper.Map<List<Picture>>(distributorDTO.Pictures);
+            }
+            if (distributor.Pictures == null)
+            {
+                foreach (var picture in distributorDTO.Pictures)
+                {
+                    var pic = _mapper.Map<Picture>(picture);
+                    _pictureService.SaveAsync(pic);
+                }
+            }
+            else
+            {
+                distributor.ContactInfos = _mapper.Map<List<ContactInfo>>(distributorDTO.ContactInfos);
+            }
+            await _distributorService.SaveChangesAsync();
+            return NoContent();
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDistributorAsync(int id)
+        {
+            var distributor = _distributorService.FetchAsync(id);
+            if (distributor == null)
+            {
+                return NotFound();
+            }
+            await _distributorService.DeleteAsync(id);
+            return NoContent();
         }
     }
 }

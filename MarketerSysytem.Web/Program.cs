@@ -70,10 +70,16 @@ static void AddRepositoriesAndServices(IServiceCollection services)
     services.AddScoped<IContactInfoRepository, ContactInfoRepository>();
     services.AddScoped<IAddressRepository, AddressRepository>();
     services.AddScoped<IPassportRepository, PassportRepository>();
+    services.AddScoped<IProductRepository, ProductRepository>();
+    services.AddScoped<ISellRepository, SellRepository>();
+    services.AddScoped<IBonusPaymentRepository, BonusPaymentRepository>();
 
     services.AddScoped<IDistributorService, DistributorService>();
     services.AddScoped<IPictureService, PictureService>();
     services.AddScoped<IContactInfoService, ContactInfoService>();
     services.AddScoped<IAddressService, AddressService>();
     services.AddScoped<IPassportService, PassportService>();
+    services.AddScoped<IProductService, ProductService>();
+    services.AddScoped<ISellService, SellService>();
+    services.AddScoped<IBonusPaymentService, BonusPaymentService>();
 }

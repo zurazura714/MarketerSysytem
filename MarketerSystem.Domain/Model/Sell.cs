@@ -22,6 +22,7 @@ namespace MarketerSystem.Domain.Model
         public decimal ProductPrice { get; set; }
         public decimal ProductUnitPrice { get; set; }
         public decimal ProductTotalPrice { get; set; }
+        public bool UsedForPayment { get; set; }
 
     }
 }

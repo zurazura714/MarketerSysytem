@@ -4,7 +4,7 @@ using MarketerSystem.Domain.Model;
 
 namespace MarketerSysytem.Web.Profiles
 {
-    public class PictureProfile : Profile
+    public partial class PictureProfile : Profile
     {
         public PictureProfile()
         {
