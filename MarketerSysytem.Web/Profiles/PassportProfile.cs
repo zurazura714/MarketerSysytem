@@ -1,15 +1,15 @@
-﻿using AutoMapper;
+using Mapster;
 using MarketerSystem.Common.DTO;
 using MarketerSystem.Domain.Model;
 
 namespace MarketerSysytem.Web.Profiles
 {
-    public class PassportProfile : Profile
+    public class PassportProfile : IRegister
     {
-        public PassportProfile()
+        public void Register(TypeAdapterConfig config)
         {
-            CreateMap<Passport, PassportDTO>();
-            CreateMap<Passport, PassportCreateDTO>().ReverseMap();
+            config.NewConfig<Passport, PassportDTO>();
+            config.NewConfig<Passport, PassportCreateDTO>().TwoWays();
         }
     }
 }

@@ -1,7 +1,7 @@
-using FluentAssertions;
 using MarketerSystem.Domain.Model;
 using MarketerSystem.Repository.Repository;
 using MarketerSystem.Tests.Infrastructure;
+using Shouldly;
 
 namespace MarketerSystem.Tests.Repositories;
 
@@ -26,8 +26,8 @@ public class BonusPaymentRepositoryTests
         await db.CommitAsync();
 
         var stored = await repo.FetchAsync(1);
-        stored.Should().NotBeNull();
-        stored!.BonusPay.Should().Be(42);
+        stored.ShouldNotBeNull();
+        stored.BonusPay.ShouldBe(42);
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public class BonusPaymentRepositoryTests
 
         var result = await repo.FetchAsync(404);
 
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 
     [Fact]
@@ -51,9 +51,9 @@ public class BonusPaymentRepositoryTests
         await repo.SaveAsync(new BonusPayment { ID = 2, BonusPay = 20, DistributorID = 2 });
         await db.CommitAsync();
 
-        var all = await repo.SetAsync();
+        var all = (await repo.SetAsync()).ToList();
 
-        all.Should().HaveCount(2);
+        all.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -70,6 +70,6 @@ public class BonusPaymentRepositoryTests
         await db.CommitAsync();
 
         var result = await repo.FetchAsync(1);
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 }

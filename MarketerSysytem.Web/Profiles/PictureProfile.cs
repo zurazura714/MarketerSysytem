@@ -1,15 +1,15 @@
-﻿using AutoMapper;
+using Mapster;
 using MarketerSystem.Common.DTO;
 using MarketerSystem.Domain.Model;
 
 namespace MarketerSysytem.Web.Profiles
 {
-    public partial class PictureProfile : Profile
+    public partial class PictureProfile : IRegister
     {
-        public PictureProfile()
+        public void Register(TypeAdapterConfig config)
         {
-            CreateMap<Picture, PictureDTO>();
-            CreateMap<Picture, PictureCreateDTO>().ReverseMap();
+            config.NewConfig<Picture, PictureDTO>();
+            config.NewConfig<Picture, PictureCreateDTO>().TwoWays();
         }
     }
 }

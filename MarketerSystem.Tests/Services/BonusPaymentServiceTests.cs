@@ -1,9 +1,9 @@
-using FluentAssertions;
 using MarketerSystem.Abstractions.Repository;
 using MarketerSystem.Domain.Model;
 using MarketerSystem.Domain.ResourceParameters;
 using MarketerSystem.Service.Service;
 using Moq;
+using Shouldly;
 
 namespace MarketerSystem.Tests.Services;
 
@@ -21,9 +21,7 @@ public class BonusPaymentServiceTests
     [Fact]
     public async Task FilterPaymentsProducts_NullParameters_ThrowsArgumentNullException()
     {
-        Func<Task> act = () => _sut.FilterPaymentsProducts(null!);
-
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await Should.ThrowAsync<ArgumentNullException>(() => _sut.FilterPaymentsProducts(null!));
     }
 
     [Fact]
@@ -33,7 +31,7 @@ public class BonusPaymentServiceTests
 
         var result = await _sut.FilterPaymentsProducts(new PaymentFilterParameters());
 
-        result.Should().HaveCount(3);
+        result.Count.ShouldBe(3);
     }
 
     [Fact]
@@ -43,8 +41,8 @@ public class BonusPaymentServiceTests
 
         var result = await _sut.FilterPaymentsProducts(new PaymentFilterParameters { MinPrice = 50 });
 
-        result.Should().HaveCount(2)
-            .And.OnlyContain(p => p.BonusPay >= 50);
+        result.Count.ShouldBe(2);
+        result.ShouldAllBe(p => p.BonusPay >= 50);
     }
 
     [Fact]
@@ -54,8 +52,8 @@ public class BonusPaymentServiceTests
 
         var result = await _sut.FilterPaymentsProducts(new PaymentFilterParameters { MaxPrice = 50 });
 
-        result.Should().HaveCount(2)
-            .And.OnlyContain(p => p.BonusPay <= 50);
+        result.Count.ShouldBe(2);
+        result.ShouldAllBe(p => p.BonusPay <= 50);
     }
 
     [Fact]
@@ -65,8 +63,8 @@ public class BonusPaymentServiceTests
 
         var result = await _sut.FilterPaymentsProducts(new PaymentFilterParameters { Name = "Zura" });
 
-        result.Should().ContainSingle()
-            .Which.Distributor.FirstName.Should().Be("Zura");
+        var only = result.ShouldHaveSingleItem();
+        only.Distributor.FirstName.ShouldBe("Zura");
     }
 
     [Fact]
@@ -76,8 +74,8 @@ public class BonusPaymentServiceTests
 
         var result = await _sut.FilterPaymentsProducts(new PaymentFilterParameters { LastName = "Beridze" });
 
-        result.Should().ContainSingle()
-            .Which.Distributor.LastName.Should().Be("Beridze");
+        var only = result.ShouldHaveSingleItem();
+        only.Distributor.LastName.ShouldBe("Beridze");
     }
 
     [Fact]

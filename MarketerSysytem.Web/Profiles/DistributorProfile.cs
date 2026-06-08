@@ -1,15 +1,15 @@
-﻿using AutoMapper;
+using Mapster;
 using MarketerSystem.Common.DTO;
 using MarketerSystem.Domain.Model;
 
 namespace MarketerSysytem.Web.Profiles
 {
-    public class DistributorProfile : Profile
+    public class DistributorProfile : IRegister
     {
-        public DistributorProfile()
+        public void Register(TypeAdapterConfig config)
         {
-            CreateMap<Distributor, DistributorDTO>();
-            CreateMap<Distributor, DistributorCreateDTO>().ReverseMap();
+            config.NewConfig<Distributor, DistributorDTO>();
+            config.NewConfig<Distributor, DistributorCreateDTO>().TwoWays();
         }
     }
 }

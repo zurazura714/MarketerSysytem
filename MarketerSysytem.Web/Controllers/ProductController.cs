@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using MapsterMapper;
 using MarketerSystem.Abstractions.Service;
 using MarketerSystem.Common.DTO;
 using MarketerSystem.Domain.Model;

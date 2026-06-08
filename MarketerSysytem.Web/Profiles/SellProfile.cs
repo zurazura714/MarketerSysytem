@@ -1,22 +1,22 @@
-﻿using AutoMapper;
+using Mapster;
 using MarketerSystem.Common.DTO;
 using MarketerSystem.Domain.Model;
 
 namespace MarketerSysytem.Web.Profiles
 {
-    public partial class SellProfile : Profile
+    public partial class SellProfile : IRegister
     {
-        public SellProfile()
+        public void Register(TypeAdapterConfig config)
         {
-            CreateMap<Sell, SellDTO>();
-            CreateMap<Sell, SellCreateDTO>().ReverseMap();
+            config.NewConfig<Sell, SellDTO>();
+            config.NewConfig<Sell, SellCreateDTO>().TwoWays();
         }
     }
-    public partial class BonusPaymentProfile : Profile
+    public partial class BonusPaymentProfile : IRegister
     {
-        public BonusPaymentProfile()
+        public void Register(TypeAdapterConfig config)
         {
-            CreateMap<BonusPayment, BonusPaymentDTO>();
+            config.NewConfig<BonusPayment, BonusPaymentDTO>();
         }
     }
 }

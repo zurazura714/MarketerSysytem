@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using Mapster;
 using MarketerSystem.Common.DTO;
 using MarketerSystem.Domain.Model;
 
@@ -6,11 +6,11 @@ namespace MarketerSysytem.Web.Profiles
 {
     public partial class PictureProfile
     {
-        public class ProductProfile : Profile
+        public class ProductProfile : IRegister
         {
-            public ProductProfile()
+            public void Register(TypeAdapterConfig config)
             {
-                CreateMap<Product, ProductDTO>();
+                config.NewConfig<Product, ProductDTO>();
             }
         }
     }

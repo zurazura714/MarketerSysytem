@@ -1,8 +1,8 @@
-using FluentAssertions;
 using MarketerSystem.Abstractions.Repository;
 using MarketerSystem.Domain.Model;
 using MarketerSystem.Service.Service;
 using Moq;
+using Shouldly;
 
 namespace MarketerSystem.Tests.Services;
 
@@ -25,7 +25,7 @@ public class ProductServiceTests
 
         var result = await _sut.FetchAsync(1);
 
-        result.Should().BeSameAs(product);
+        result.ShouldBeSameAs(product);
     }
 
     [Fact]
@@ -38,9 +38,11 @@ public class ProductServiceTests
         };
         _repo.Setup(r => r.SetAsync()).ReturnsAsync(products);
 
-        var result = await _sut.SetAsync();
+        var result = (await _sut.SetAsync()).ToList();
 
-        result.Should().BeEquivalentTo(products);
+        result.Count.ShouldBe(2);
+        result[0].ShouldBeSameAs(products[0]);
+        result[1].ShouldBeSameAs(products[1]);
     }
 
     [Fact]

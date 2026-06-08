@@ -1,15 +1,15 @@
-﻿using AutoMapper;
+using Mapster;
 using MarketerSystem.Common.DTO;
 using MarketerSystem.Domain.Model;
 
 namespace MarketerSysytem.Web.Profiles
 {
-    public class AddressProfile : Profile
+    public class AddressProfile : IRegister
     {
-        public AddressProfile()
+        public void Register(TypeAdapterConfig config)
         {
-            CreateMap<Address, AddressDTO>();
-            CreateMap<Address, AddressCreateDTO>().ReverseMap();
+            config.NewConfig<Address, AddressDTO>();
+            config.NewConfig<Address, AddressCreateDTO>().TwoWays();
         }
     }
 }
