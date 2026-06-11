@@ -1,14 +1,5 @@
-﻿using MarketerSystem.Domain.Model;
-using System;
-using System.Collections.Generic;
-using System.Formats.Tar;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MarketerSystem.Domain.Model;
 
-namespace MarketerSystem.Abstractions.Repository
-{
-    public interface IDistributorRepository : IRepositoryBase<Distributor>
-    {
-    }
-}
+namespace MarketerSystem.Abstractions.Repository;
+
+public interface IDistributorRepository : IRepositoryBase<Distributor>;

@@ -1,57 +1,64 @@
-﻿using MapsterMapper;
+using MapsterMapper;
 using MarketerSystem.Abstractions.Service;
 using MarketerSystem.Common.DTO;
 using MarketerSystem.Domain.Model;
 using MarketerSystem.Domain.ResourceParameters;
-using MarketerSystem.Service.Service;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MarketerSysytem.Web.Controllers
+namespace MarketerSysytem.Web.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class SellController(
+    IMapper mapper,
+    ISellService sellService,
+    IDistributorService distributorService,
+    IProductService productService) : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class SellController : Controller
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<SellDTO>>> GetSoldProductsAsync([FromQuery] SellResourceParameters parameters)
     {
-        private readonly IMapper _mapper;
-        private readonly ISellService _sellService;
-        private readonly IDistributorService _distributorService;
-        private readonly IProductService _productService;
-        public SellController(IMapper mapper, ISellService sellService, IDistributorService distributorService, IProductService productService)
+        var soldProducts = await sellService.FilterSoldProducts(parameters);
+        return Ok(mapper.Map<IEnumerable<SellDTO>>(soldProducts));
+    }
+
+    [HttpGet("{id}", Name = "GetSoldProduct")]
+    public async Task<ActionResult<ProductDTO>> GetSoldProductAsync(int id)
+    {
+        var soldProduct = await sellService.FetchAsync(id);
+        if (soldProduct == null)
         {
-            _mapper = mapper;
-            _sellService = sellService;
-            _distributorService = distributorService;
-            _productService = productService;
+            return NotFound();
         }
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<SellDTO>>> GetSoldProductsAsync([FromQuery] SellResourceParameters sellResourceParameters )
+        return Ok(mapper.Map<SellDTO>(soldProduct));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SellProductAsync(SellCreateDTO sellDTO)
+    {
+        var sellEntity = mapper.Map<Sell>(sellDTO);
+
+        var product = await productService.FetchAsync(sellEntity.ProductID);
+        if (product == null)
         {
-            var soldProducts = await _sellService.FilterSoldProducts(sellResourceParameters);
-            return Ok(_mapper.Map<IEnumerable<SellDTO>>(soldProducts));
+            return BadRequest(new { error = $"Product {sellEntity.ProductID} not found" });
+        }
+        var distributor = await distributorService.FetchAsync(sellEntity.DistributorID);
+        if (distributor == null)
+        {
+            return BadRequest(new { error = $"Distributor {sellEntity.DistributorID} not found" });
         }
 
-        [HttpGet("{id}", Name = "GetSoldProduct")]
-        public async Task<ActionResult<ProductDTO>> GetSoldProductAsync(int id)
-        {
-            var soldProduct = await _sellService.FetchAsync(id);
-            return Ok(_mapper.Map<SellDTO>(soldProduct));
-        }
+        sellEntity.Product = product;
+        sellEntity.Distributor = distributor;
+        sellEntity.ProductPrice = product.Price;
+        sellEntity.ProductTotalPrice = product.Price;
+        sellEntity.ProductUnitPrice = product.Price;
+        await sellService.SaveAsync(sellEntity);
 
-        [HttpPost]
-        public async Task<IActionResult> SellProductAsync(SellCreateDTO sellDTO)
-        {
-            var sellEntity = _mapper.Map<Sell>(sellDTO);
-            sellEntity.Product = await _productService.FetchAsync(sellEntity.ProductID);
-            sellEntity.Distributor = await _distributorService.FetchAsync(sellEntity.DistributorID);
-            sellEntity.ProductPrice = sellEntity.Product.Price;
-            sellEntity.ProductTotalPrice = sellEntity.Product.Price;
-            sellEntity.ProductUnitPrice = sellEntity.Product.Price;
-            await _sellService.SaveAsync(sellEntity);
-
-            var soldProduct = _mapper.Map<SellDTO>(sellEntity);
-            return CreatedAtRoute("GetSoldProduct",
-                new { id = soldProduct.ID },
-                soldProduct);
-        }
+        var soldProduct = mapper.Map<SellDTO>(sellEntity);
+        return CreatedAtRoute("GetSoldProduct",
+            new { id = soldProduct.ID },
+            soldProduct);
     }
 }

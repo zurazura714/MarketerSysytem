@@ -1,10 +1,9 @@
-﻿using MarketerSystem.Common.Enums;
+using MarketerSystem.Common.Enums;
 
-namespace MarketerSystem.Common.DTO
+namespace MarketerSystem.Common.DTO;
+
+public class AddressCreateDTO
 {
-    public class AddressCreateDTO
-    {
-        public AddressType AddressType { get; set; }
-        public string AddressInfo { get; set; }
-    }
+    public AddressType AddressType { get; set; }
+    public string AddressInfo { get; set; } = string.Empty;
 }

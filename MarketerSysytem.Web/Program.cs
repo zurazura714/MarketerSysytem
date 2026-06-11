@@ -5,6 +5,7 @@ using MarketerSystem.Abstractions.Service;
 using MarketerSystem.Data.Context;
 using MarketerSystem.Repository.Repository;
 using MarketerSystem.Service.Service;
+using MarketerSysytem.Web.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
@@ -16,32 +17,38 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
 builder.Services.AddControllers();
-
 builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.Services
+    .AddHealthChecks()
+    .AddDbContextCheck<MarketerDBContext>();
 
 builder.Services.AddDbContext<MarketerDBContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("MarketerDBContext")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MarketerDBContext")));
 
 AddMapster(builder.Services);
 AddRepositoriesAndServices(builder.Services);
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
     app.MapOpenApi();
     app.MapScalarApiReference();
+    UpdateDatabase(app);
 }
-
-UpdateDatabase(app);
 
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
 app.MapControllers();
-
+app.MapHealthChecks("/healthz");
 app.Run();
 
 

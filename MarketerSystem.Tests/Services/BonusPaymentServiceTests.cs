@@ -11,17 +11,100 @@ public class BonusPaymentServiceTests
 {
     private readonly Mock<IUnitOfWork> _uow = new();
     private readonly Mock<IBonusPaymentRepository> _repo = new();
+    private readonly Mock<ISellRepository> _sellRepo = new();
+    private readonly Mock<IDistributorRepository> _distributorRepo = new();
     private readonly BonusPaymentService _sut;
 
     public BonusPaymentServiceTests()
     {
-        _sut = new BonusPaymentService(_uow.Object, _repo.Object);
+        _sut = new BonusPaymentService(_uow.Object, _repo.Object, _sellRepo.Object, _distributorRepo.Object);
     }
 
     [Fact]
     public async Task FilterPaymentsProducts_NullParameters_ThrowsArgumentNullException()
     {
         await Should.ThrowAsync<ArgumentNullException>(() => _sut.FilterPaymentsProducts(null!));
+    }
+
+    [Fact]
+    public async Task GenerateBonusPaymentsForPeriodAsync_NullParameters_ThrowsArgumentNullException()
+    {
+        await Should.ThrowAsync<ArgumentNullException>(() => _sut.GenerateBonusPaymentsForPeriodAsync(null!));
+    }
+
+    [Fact]
+    public async Task GenerateBonusPaymentsForPeriodAsync_PaysDirectSellerTenPercentAndCommits()
+    {
+        var sale = new Sell
+        {
+            ID = 1,
+            DistributorID = 7,
+            ProductTotalPrice = 100m,
+            SoldDate = new DateTimeOffset(2026, 1, 5, 0, 0, 0, TimeSpan.Zero),
+            UsedForPayment = false
+        };
+        _sellRepo.Setup(r => r.SetAsync()).ReturnsAsync(new List<Sell> { sale });
+        _distributorRepo.Setup(d => d.FetchAsync(7))
+            .ReturnsAsync(new Distributor { DistributorID = 7, GenerationLinker = null });
+
+        await _sut.GenerateBonusPaymentsForPeriodAsync(new PaymentParameters
+        {
+            FromDate = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            Todate = new DateTimeOffset(2026, 1, 31, 0, 0, 0, TimeSpan.Zero)
+        });
+
+        _repo.Verify(r => r.SaveAsync(It.Is<BonusPayment>(b =>
+            b.DistributorID == 7 && b.BonusPay == 10m)), Times.Once);
+        _sellRepo.Verify(r => r.SaveAsync(It.Is<Sell>(s => s.UsedForPayment)), Times.Once);
+        _uow.Verify(u => u.CommitAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task GenerateBonusPaymentsForPeriodAsync_PaysUplineByLevel()
+    {
+        var sale = new Sell
+        {
+            ID = 1,
+            DistributorID = 9,
+            ProductTotalPrice = 100m,
+            SoldDate = new DateTimeOffset(2026, 1, 5, 0, 0, 0, TimeSpan.Zero),
+            UsedForPayment = false
+        };
+        _sellRepo.Setup(r => r.SetAsync()).ReturnsAsync(new List<Sell> { sale });
+        _distributorRepo.Setup(d => d.FetchAsync(9))
+            .ReturnsAsync(new Distributor { DistributorID = 9, GenerationLinker = "1,2,3" });
+
+        await _sut.GenerateBonusPaymentsForPeriodAsync(new PaymentParameters
+        {
+            FromDate = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            Todate = new DateTimeOffset(2026, 1, 31, 0, 0, 0, TimeSpan.Zero)
+        });
+
+        _repo.Verify(r => r.SaveAsync(It.Is<BonusPayment>(b => b.DistributorID == 9 && b.BonusPay == 10m)), Times.Once);
+        _repo.Verify(r => r.SaveAsync(It.Is<BonusPayment>(b => b.DistributorID == 3 && b.BonusPay == 5m)), Times.Once);
+        _repo.Verify(r => r.SaveAsync(It.Is<BonusPayment>(b => b.DistributorID == 2 && b.BonusPay == 1m)), Times.Once);
+        _repo.Verify(r => r.SaveAsync(It.Is<BonusPayment>(b => b.DistributorID == 1)), Times.Never);
+    }
+
+    [Fact]
+    public async Task GenerateBonusPaymentsForPeriodAsync_SkipsAlreadyPaidSales()
+    {
+        var sale = new Sell
+        {
+            ID = 1, DistributorID = 7, ProductTotalPrice = 100m,
+            SoldDate = new DateTimeOffset(2026, 1, 5, 0, 0, 0, TimeSpan.Zero),
+            UsedForPayment = true
+        };
+        _sellRepo.Setup(r => r.SetAsync()).ReturnsAsync(new List<Sell> { sale });
+
+        await _sut.GenerateBonusPaymentsForPeriodAsync(new PaymentParameters
+        {
+            FromDate = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            Todate = new DateTimeOffset(2026, 1, 31, 0, 0, 0, TimeSpan.Zero)
+        });
+
+        _repo.Verify(r => r.SaveAsync(It.IsAny<BonusPayment>()), Times.Never);
+        _sellRepo.Verify(r => r.SaveAsync(It.IsAny<Sell>()), Times.Never);
     }
 
     [Fact]

@@ -1,12 +1,6 @@
-﻿using MarketerSystem.Abstractions.Repository;
+using MarketerSystem.Abstractions.Repository;
 using MarketerSystem.Domain.Model;
 
-namespace MarketerSystem.Repository.Repository
-{
-    public class BonusPaymentRepository : RepositoryBase<BonusPayment>, IBonusPaymentRepository
-    {
-        public BonusPaymentRepository(IUnitOfWork context) : base(context)
-        {
-        }
-    }
-}
+namespace MarketerSystem.Repository.Repository;
+
+public class BonusPaymentRepository(IUnitOfWork context) : RepositoryBase<BonusPayment>(context), IBonusPaymentRepository;

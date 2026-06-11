@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+namespace MarketerSystem.Common.Enums;
 
-namespace MarketerSystem.Common.Enums
+public enum Gender
 {
-    public enum Gender
-    {
-        Male = 1,
-        Female = 2,
-        NonBinary = 3
-    }
+    Male = 1,
+    Female = 2,
+    NonBinary = 3
 }

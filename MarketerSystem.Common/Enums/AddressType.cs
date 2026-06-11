@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+namespace MarketerSystem.Common.Enums;
 
-namespace MarketerSystem.Common.Enums
+public enum AddressType
 {
-    public enum AddressType
-    {
-        Actual = 1,
-        Registration = 2
-    }
+    Actual = 1,
+    Registration = 2
 }

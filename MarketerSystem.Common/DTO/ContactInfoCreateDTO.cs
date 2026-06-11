@@ -1,10 +1,9 @@
-﻿using MarketerSystem.Common.Enums;
+using MarketerSystem.Common.Enums;
 
-namespace MarketerSystem.Common.DTO
+namespace MarketerSystem.Common.DTO;
+
+public class ContactInfoCreateDTO
 {
-    public class ContactInfoCreateDTO
-    {
-        public ContactInformationType ContactInformationType { get; set; }
-        public string Information { get; set; }
-    }
+    public ContactInformationType ContactInformationType { get; set; }
+    public string Information { get; set; } = string.Empty;
 }

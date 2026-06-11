@@ -1,20 +1,23 @@
-﻿using MarketerSystem.Common.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MarketerSystem.Common.Enums;
 
-namespace MarketerSystem.Domain.Model
+namespace MarketerSystem.Domain.Model;
+
+public class Address
 {
-    public class Address
-    {
-        [Key]
-        public int ID { get; set; }
-        [Required]
-        public AddressType AddressType { get; set; }
-        [Required, MaxLength(100)]
-        public string AddressInfo { get; set; }
-        [Required]
-        public int DistributorID { get; set; }
-        [ForeignKey(nameof(DistributorID))]
-        public virtual Distributor Distributor { get; set; }
-    }
+    [Key]
+    public int ID { get; set; }
+
+    [Required]
+    public AddressType AddressType { get; set; }
+
+    [Required, MaxLength(100)]
+    public string AddressInfo { get; set; } = string.Empty;
+
+    [Required]
+    public int DistributorID { get; set; }
+
+    [ForeignKey(nameof(DistributorID))]
+    public virtual Distributor? Distributor { get; set; }
 }

@@ -1,35 +1,31 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using MarketerSystem.Common.Enums;
 
-namespace MarketerSystem.Common.DTO
+namespace MarketerSystem.Common.DTO;
+
+public class DistributorCreateDTO
 {
-    public class DistributorCreateDTO
-    {
+    [Required, MaxLength(50)]
+    public string FirstName { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(50)]
-        public string FirstName { get; set; }
+    [Required, MaxLength(50)]
+    public string LastName { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(50)]
-        public string LastName { get; set; }
+    [Required]
+    public DateTime BirthDate { get; set; }
 
-        [Required]
-        public DateTime BirthDate { get; set; }
+    [Required]
+    public Gender Gender { get; set; }
 
-        [Required]
-        public Gender Gender { get; set; }
+    public PassportCreateDTO? Passport { get; set; }
 
-        public PassportCreateDTO Passport { get; set; }
+    public int? RecomendatorID { get; set; }
 
-        public int? RecomendatorID { get; set; }
+    public ICollection<PictureCreateDTO>? Pictures { get; set; }
 
-        public ICollection<PictureCreateDTO> Pictures { get; set; }
+    [Required]
+    public ICollection<ContactInfoCreateDTO> ContactInfos { get; set; } = [];
 
-        [Required]
-        public ICollection<ContactInfoCreateDTO> ContactInfos { get; set; }
-
-        [Required]
-        public ICollection<AddressCreateDTO> Addresses { get; set; }
-    }
+    [Required]
+    public ICollection<AddressCreateDTO> Addresses { get; set; } = [];
 }

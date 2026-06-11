@@ -1,8 +1,5 @@
-﻿using MarketerSystem.Domain.Model;
+using MarketerSystem.Domain.Model;
 
-namespace MarketerSystem.Abstractions.Repository
-{
-    public interface IPassportRepository : IRepositoryBase<Passport>
-    {
-    }
-}
+namespace MarketerSystem.Abstractions.Repository;
+
+public interface IPassportRepository : IRepositoryBase<Passport>;

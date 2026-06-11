@@ -1,10 +1,9 @@
-﻿using MarketerSystem.Domain.Model;
+using MarketerSystem.Domain.Model;
 using MarketerSystem.Domain.ResourceParameters;
 
-namespace MarketerSystem.Abstractions.Service
+namespace MarketerSystem.Abstractions.Service;
+
+public interface ISellService : IServiceBase<Sell>
 {
-    public interface ISellService : IServiceBase<Sell>
-    {
-        Task<List<Sell>> FilterSoldProducts(SellResourceParameters parameters);
-    }
+    Task<List<Sell>> FilterSoldProducts(SellResourceParameters parameters);
 }

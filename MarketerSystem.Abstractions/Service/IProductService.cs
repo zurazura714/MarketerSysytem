@@ -1,8 +1,5 @@
-﻿using MarketerSystem.Domain.Model;
+using MarketerSystem.Domain.Model;
 
-namespace MarketerSystem.Abstractions.Service
-{
-    public interface IProductService : IServiceBase<Product>
-    {
-    }
-}
+namespace MarketerSystem.Abstractions.Service;
+
+public interface IProductService : IServiceBase<Product>;

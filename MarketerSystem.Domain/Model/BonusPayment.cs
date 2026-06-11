@@ -1,21 +1,21 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MarketerSystem.Domain.Model
+namespace MarketerSystem.Domain.Model;
+
+public class BonusPayment
 {
-    public class BonusPayment
-    {
-        [Key]
-        public int ID { get; set; }
-        [Required]
-        public decimal BonusPay { get; set; }
-        public DateTimeOffset FromDate { get; set; }
-        public DateTimeOffset ToDate { get; set; }
+    [Key]
+    public int ID { get; set; }
 
-        [ForeignKey(nameof(Distributor))]
-        public int DistributorID { get; set; }
+    [Required]
+    public decimal BonusPay { get; set; }
 
-        public virtual Distributor Distributor { get; set; }
+    public DateTimeOffset FromDate { get; set; }
+    public DateTimeOffset ToDate { get; set; }
 
-    }
+    [ForeignKey(nameof(Distributor))]
+    public int DistributorID { get; set; }
+
+    public virtual Distributor? Distributor { get; set; }
 }

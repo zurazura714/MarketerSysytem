@@ -2,21 +2,13 @@ using Mapster;
 using MarketerSystem.Common.DTO;
 using MarketerSystem.Domain.Model;
 
-namespace MarketerSysytem.Web.Profiles
+namespace MarketerSysytem.Web.Profiles;
+
+public class SellProfile : IRegister
 {
-    public partial class SellProfile : IRegister
+    public void Register(TypeAdapterConfig config)
     {
-        public void Register(TypeAdapterConfig config)
-        {
-            config.NewConfig<Sell, SellDTO>();
-            config.NewConfig<Sell, SellCreateDTO>().TwoWays();
-        }
-    }
-    public partial class BonusPaymentProfile : IRegister
-    {
-        public void Register(TypeAdapterConfig config)
-        {
-            config.NewConfig<BonusPayment, BonusPaymentDTO>();
-        }
+        config.NewConfig<Sell, SellDTO>();
+        config.NewConfig<Sell, SellCreateDTO>().TwoWays();
     }
 }

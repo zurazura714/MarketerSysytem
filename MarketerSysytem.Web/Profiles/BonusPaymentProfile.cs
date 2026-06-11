@@ -4,11 +4,10 @@ using MarketerSystem.Domain.Model;
 
 namespace MarketerSysytem.Web.Profiles;
 
-public class PassportProfile : IRegister
+public class BonusPaymentProfile : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<Passport, PassportDTO>();
-        config.NewConfig<Passport, PassportCreateDTO>().TwoWays();
+        config.NewConfig<BonusPayment, BonusPaymentDTO>();
     }
 }

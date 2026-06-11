@@ -1,12 +1,6 @@
-﻿using MarketerSystem.Abstractions.Repository;
+using MarketerSystem.Abstractions.Repository;
 using MarketerSystem.Domain.Model;
 
-namespace MarketerSystem.Repository.Repository
-{
-    public class AddressRepository : RepositoryBase<Address>, IAddressRepository
-    {
-        public AddressRepository(IUnitOfWork context) : base(context)
-        {
-        }
-    }
-}
+namespace MarketerSystem.Repository.Repository;
+
+public class AddressRepository(IUnitOfWork context) : RepositoryBase<Address>(context), IAddressRepository;

@@ -1,82 +1,72 @@
-﻿using MapsterMapper;
+using MapsterMapper;
 using MarketerSystem.Abstractions.Service;
 using MarketerSystem.Common.DTO;
 using MarketerSystem.Domain.Model;
 using Microsoft.AspNetCore.Mvc;
-using System.Text;
 
-namespace MarketerSysytem.Web.Controllers
+namespace MarketerSysytem.Web.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class ProductController(IMapper mapper, IProductService productService) : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ProductController : Controller
+    [HttpGet]
+    [HttpHead]
+    public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsAsync()
     {
-        private readonly IMapper _mapper;
-        private readonly IProductService _productService;
-        public ProductController(IMapper mapper, IProductService productService)
+        var products = await productService.SetAsync();
+        return Ok(mapper.Map<IEnumerable<ProductDTO>>(products));
+    }
+
+    [HttpGet("{id}", Name = "GetProduct")]
+    public async Task<IActionResult> GetProductAsync(int id)
+    {
+        var product = await productService.FetchAsync(id);
+        if (product == null)
         {
-            _mapper = mapper;
-            _productService = productService;
+            return NotFound();
         }
 
-        [HttpGet]
-        [HttpHead]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsAsync()
+        return Ok(mapper.Map<ProductDTO>(product));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateProductAsync(ProductCreateDTO productDTO)
+    {
+        var productEntity = mapper.Map<Product>(productDTO);
+
+        await productService.SaveAsync(productEntity);
+
+        var productReturn = mapper.Map<ProductDTO>(productEntity);
+        return CreatedAtRoute("GetProduct",
+            new { id = productReturn.ID },
+            productReturn);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateProductAsync(int id, ProductCreateDTO productDTO)
+    {
+        var product = await productService.FetchAsync(id);
+        if (product == null)
         {
-            var products = await _productService.SetAsync();
-            return Ok(_mapper.Map<IEnumerable<ProductDTO>>(products));
+            return NotFound();
         }
+        product.Price = productDTO.Price;
+        product.Name = productDTO.Name;
 
+        await productService.SaveChangesAsync();
+        return NoContent();
+    }
 
-        [HttpGet("{id}", Name = "GetProduct")]
-        public async Task<IActionResult> GetProductAsync(int id)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteProductAsync(int id)
+    {
+        var product = await productService.FetchAsync(id);
+        if (product == null)
         {
-            var product = await _productService.FetchAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(_mapper.Map<ProductDTO>(product));
+            return NotFound();
         }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateProductAsync(ProductCreateDTO productDTO)
-        {
-            var productEntity = _mapper.Map<Product>(productDTO);
-            
-            await _productService.SaveAsync(productEntity);
-
-            var productReturn = _mapper.Map<ProductDTO>(productEntity);
-            return CreatedAtRoute("GetProduct",
-                new { id = productReturn.ID },
-                productReturn);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProductAsync(int id, ProductCreateDTO productDTO)
-        {
-            var product = await _productService.FetchAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            product.Price = productDTO.Price;
-            product.Name = productDTO.Name;
-
-            await _productService.SaveChangesAsync();
-            return NoContent();
-        }
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProductAsync(int id)
-        {
-            var product = _productService.FetchAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            await _productService.DeleteAsync(id);
-            return NoContent();
-        }
+        await productService.DeleteAsync(id);
+        return NoContent();
     }
 }
