@@ -368,3 +368,6 @@ CLAUDE.md
 CLAUDE-*.md
 **/CLAUDE-*.md
 docs/claude/
+
+# Superpowers visual-companion working files (local brainstorm sessions)
+.superpowers/
