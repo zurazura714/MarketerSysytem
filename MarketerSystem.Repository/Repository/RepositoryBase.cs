@@ -19,21 +19,18 @@ public abstract class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where T
         return await _context.Set<TEntity>().FindAsync(id);
     }
 
-    public virtual Task<IEnumerable<TEntity>> SetAsync()
-    {
-        return Task.FromResult<IEnumerable<TEntity>>(_context.Set<TEntity>());
-    }
+    public virtual IQueryable<TEntity> Set() => _context.Set<TEntity>();
 
-    public virtual async Task AddAsync(TEntity entity)
+    public virtual async Task SaveAsync(TEntity entity)
     {
+        // Tracked entities persist their modifications on commit without re-adding;
+        // only detached (new) entities need to enter the change tracker.
         var entry = _context.Entry(entity);
         if (entry.State == EntityState.Detached)
         {
             await _context.Set<TEntity>().AddAsync(entity);
         }
     }
-
-    public virtual Task SaveAsync(TEntity entity) => AddAsync(entity);
 
     public virtual async Task DeleteAsync(int id)
     {

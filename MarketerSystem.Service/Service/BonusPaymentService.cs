@@ -23,85 +23,87 @@ public class BonusPaymentService : ServiceBase<BonusPayment, IBonusPaymentReposi
         _distributorRepository = distributorRepository ?? throw new ArgumentNullException(nameof(distributorRepository));
     }
 
-    public async Task<List<BonusPayment>> FilterPaymentsProducts(PaymentFilterParameters parameters)
+    public Task<List<BonusPayment>> FilterPaymentsProducts(PaymentFilterParameters parameters)
     {
-        if (parameters == null)
-        {
-            throw new ArgumentNullException(nameof(parameters));
-        }
+        ArgumentNullException.ThrowIfNull(parameters);
 
-        var payments = (await SetAsync()).AsQueryable().Include(a => a.Distributor)
+        return _repository.Set()
+            .Include(a => a.Distributor)
             .Where(a =>
                 (parameters.MinPrice == null || parameters.MinPrice <= a.BonusPay) &&
                 (parameters.MaxPrice == null || parameters.MaxPrice >= a.BonusPay) &&
-                (parameters.Name == null || a.Distributor.FirstName.Contains(parameters.Name)) &&
-                (parameters.LastName == null || a.Distributor.LastName.Contains(parameters.LastName)))
-            .ToList();
-
-        return payments;
+                (parameters.Name == null || a.Distributor!.FirstName.Contains(parameters.Name)) &&
+                (parameters.LastName == null || a.Distributor!.LastName.Contains(parameters.LastName)))
+            .ToListAsync();
     }
 
-    public async Task GenerateBonusPaymentsForPeriodAsync(PaymentParameters parameters)
+    public async Task<List<BonusPayment>> GenerateBonusPaymentsForPeriodAsync(PaymentParameters parameters)
     {
-        if (parameters == null)
-        {
-            throw new ArgumentNullException(nameof(parameters));
-        }
+        ArgumentNullException.ThrowIfNull(parameters);
 
-        var unpaidSales = (await _sellRepository.SetAsync())
+        var unpaidSales = await _sellRepository.Set()
             .Where(s => s.SoldDate >= parameters.FromDate
                      && s.SoldDate <= parameters.Todate
                      && !s.UsedForPayment)
-            .ToList();
+            .ToListAsync();
 
+        var sellerIds = unpaidSales.Select(s => s.DistributorID).Distinct().ToList();
+        var sellers = await _distributorRepository.Set()
+            .Where(d => sellerIds.Contains(d.DistributorID))
+            .ToDictionaryAsync(d => d.DistributorID);
+
+        var createdPayments = new List<BonusPayment>();
         foreach (var sale in unpaidSales)
         {
+            // The sale is tracked by the query above — mutating it is enough,
+            // the change persists on the single commit below.
             sale.UsedForPayment = true;
-            await _sellRepository.SaveAsync(sale);
 
-            await _repository.SaveAsync(new BonusPayment
-            {
-                FromDate = parameters.FromDate,
-                ToDate = parameters.Todate,
-                DistributorID = sale.DistributorID,
-                BonusPay = BonusPercentages.DirectSeller * sale.ProductTotalPrice
-            });
+            await CreatePaymentAsync(createdPayments, sale.DistributorID,
+                BonusPercentages.DirectSeller * sale.ProductTotalPrice, parameters);
 
-            var seller = await _distributorRepository.FetchAsync(sale.DistributorID);
-            if (seller != null && !string.IsNullOrWhiteSpace(seller.GenerationLinker))
+            if (sellers.TryGetValue(sale.DistributorID, out var seller))
             {
-                await PayUplineAsync(seller.GenerationLinker, sale.ProductTotalPrice, parameters);
+                await PayUplineAsync(createdPayments, seller.GenerationLinker, sale.ProductTotalPrice, parameters);
             }
         }
 
+        // One commit: marked sales and all payments land atomically.
         await _context.CommitAsync();
+        return createdPayments;
     }
 
-    private async Task PayUplineAsync(string generationLinker, decimal saleTotal, PaymentParameters parameters)
+    private async Task PayUplineAsync(
+        List<BonusPayment> createdPayments, string? generationLinker, decimal saleTotal, PaymentParameters parameters)
     {
-        var upline = generationLinker.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var upline = GenerationChain.Parse(generationLinker);
 
-        for (int i = upline.Length - 1; i >= 0; i--)
+        // The chain is root-first; level 0 is the immediate recommender at the end.
+        for (int level = 0; level < upline.Count; level++)
         {
-            int level = upline.Length - 1 - i;
             decimal percentage = BonusPercentages.ForUplineLevel(level);
             if (percentage <= 0m)
             {
                 break;
             }
 
-            if (!int.TryParse(upline[i], out int ancestorDistributorId))
-            {
-                continue;
-            }
-
-            await _repository.SaveAsync(new BonusPayment
-            {
-                FromDate = parameters.FromDate,
-                ToDate = parameters.Todate,
-                DistributorID = ancestorDistributorId,
-                BonusPay = percentage * saleTotal
-            });
+            int ancestorDistributorId = upline[upline.Count - 1 - level];
+            await CreatePaymentAsync(createdPayments, ancestorDistributorId, percentage * saleTotal, parameters);
         }
+    }
+
+    private async Task CreatePaymentAsync(
+        List<BonusPayment> createdPayments, int distributorId, decimal bonusPay, PaymentParameters parameters)
+    {
+        var payment = new BonusPayment
+        {
+            FromDate = parameters.FromDate,
+            ToDate = parameters.Todate,
+            DistributorID = distributorId,
+            BonusPay = bonusPay
+        };
+
+        await _repository.SaveAsync(payment);
+        createdPayments.Add(payment);
     }
 }

@@ -4,6 +4,7 @@ using MarketerSystem.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MarketerSystem.Data.Migrations
 {
     [DbContext(typeof(MarketerDBContext))]
-    partial class MarketerDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260611195148_DeterministicSeedAndMoneyPrecision")]
+    partial class DeterministicSeedAndMoneyPrecision
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

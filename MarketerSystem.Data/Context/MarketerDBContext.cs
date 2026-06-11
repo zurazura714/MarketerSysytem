@@ -17,6 +17,13 @@ public class MarketerDBContext(DbContextOptions<MarketerDBContext> options) : Db
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Money columns: explicit precision matching the existing decimal(18,2) schema.
+        modelBuilder.Entity<Product>().Property(p => p.Price).HasPrecision(18, 2);
+        modelBuilder.Entity<BonusPayment>().Property(b => b.BonusPay).HasPrecision(18, 2);
+        modelBuilder.Entity<Sell>().Property(s => s.ProductPrice).HasPrecision(18, 2);
+        modelBuilder.Entity<Sell>().Property(s => s.ProductUnitPrice).HasPrecision(18, 2);
+        modelBuilder.Entity<Sell>().Property(s => s.ProductTotalPrice).HasPrecision(18, 2);
+
         modelBuilder.Entity<Distributor>()
             .HasIndex(d => d.DistributorGuid)
             .IsUnique();
@@ -47,6 +54,18 @@ public class MarketerDBContext(DbContextOptions<MarketerDBContext> options) : Db
         SeedReferenceData(modelBuilder);
     }
 
+    // Seed values must be deterministic: EF compares the model (including HasData)
+    // against the last migration snapshot, and non-deterministic values like
+    // Guid.NewGuid()/DateTime.Now register as pending model changes on every run —
+    // under EF 10 that fails Database.Migrate() at startup.
+    // DateTimeOffset seed values carry an explicit UTC offset: an implicit
+    // DateTime → DateTimeOffset conversion would use the machine's local zone,
+    // making the model differ between machines (and fail startup validation).
+    private static readonly Guid ZuraGuid = new("8d04dce2-969a-435d-bba4-df3f325983dc");
+    private static readonly Guid MaikoGuid = new("e2c1a7e0-4f2b-4f6a-9b3a-1c9d2e8f4a5b");
+    private static readonly DateTimeOffset SeedDateOffset = new(2024, 1, 15, 0, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset PassportExpiration = new(2028, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
     private static void SeedReferenceData(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Product>().HasData(
@@ -59,7 +78,7 @@ public class MarketerDBContext(DbContextOptions<MarketerDBContext> options) : Db
             new Distributor
             {
                 DistributorID = 1,
-                DistributorGuid = Guid.NewGuid(),
+                DistributorGuid = ZuraGuid,
                 Gender = Gender.Male,
                 FirstName = "Zura",
                 LastName = "Samkharadze",
@@ -70,7 +89,7 @@ public class MarketerDBContext(DbContextOptions<MarketerDBContext> options) : Db
             new Distributor
             {
                 DistributorID = 2,
-                DistributorGuid = Guid.NewGuid(),
+                DistributorGuid = MaikoGuid,
                 Gender = Gender.Female,
                 FirstName = "Maiko",
                 LastName = "Samkharadze",
@@ -89,10 +108,10 @@ public class MarketerDBContext(DbContextOptions<MarketerDBContext> options) : Db
                 DocumentNumber = "102340",
                 DocumentSerie = "11111",
                 DocumentType = DocumentType.Pasport,
-                ExpirationDate = new DateTime(2028, 1, 1),
+                ExpirationDate = PassportExpiration,
                 IssuingAgency = "SA Agency",
                 PersonalNumber = "01008048552",
-                ReleaseDate = DateTime.Now,
+                ReleaseDate = SeedDateOffset,
                 DistributorID = 1
             },
             new Passport
@@ -101,10 +120,10 @@ public class MarketerDBContext(DbContextOptions<MarketerDBContext> options) : Db
                 DocumentNumber = "102340",
                 DocumentSerie = "11111",
                 DocumentType = DocumentType.Pasport,
-                ExpirationDate = new DateTime(2028, 1, 1),
+                ExpirationDate = PassportExpiration,
                 IssuingAgency = "SA Agency",
                 PersonalNumber = "599473377",
-                ReleaseDate = DateTime.Now,
+                ReleaseDate = SeedDateOffset,
                 DistributorID = 2
             });
 
@@ -113,10 +132,10 @@ public class MarketerDBContext(DbContextOptions<MarketerDBContext> options) : Db
             new ContactInfo { ID = 2, DistributorID = 2, ContactInformationType = ContactInformationType.Email, Information = "MaikoMaiko@Gmail.com" });
 
         modelBuilder.Entity<Sell>().HasData(
-            new Sell { ID = 1, ProductID = 1, DistributorID = 1, ProductPrice = 10, ProductTotalPrice = 10, ProductUnitPrice = 10, SoldDate = DateTime.Now });
+            new Sell { ID = 1, ProductID = 1, DistributorID = 1, ProductPrice = 10, ProductTotalPrice = 10, ProductUnitPrice = 10, SoldDate = SeedDateOffset });
 
         modelBuilder.Entity<BonusPayment>().HasData(
-            new BonusPayment { ID = 1, BonusPay = 10, DistributorID = 1, FromDate = DateTime.Now.AddHours(-5), ToDate = DateTime.Now });
+            new BonusPayment { ID = 1, BonusPay = 10, DistributorID = 1, FromDate = SeedDateOffset.AddHours(-5), ToDate = SeedDateOffset });
     }
 
     public Task CommitAsync() => SaveChangesAsync();

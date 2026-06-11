@@ -43,10 +43,10 @@ if (app.Environment.IsDevelopment())
     UpdateDatabase(app);
 }
 
+app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseHttpsRedirection();
 app.MapControllers();
 app.MapHealthChecks("/healthz");
 app.Run();

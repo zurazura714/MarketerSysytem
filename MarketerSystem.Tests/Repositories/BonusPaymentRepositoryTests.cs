@@ -42,7 +42,7 @@ public class BonusPaymentRepositoryTests
     }
 
     [Fact]
-    public async Task SetAsync_ReturnsAllPersistedPayments()
+    public async Task Set_ReturnsAllPersistedPayments()
     {
         using var db = InMemoryContextFactory.Create();
         var repo = new BonusPaymentRepository(db);
@@ -51,7 +51,7 @@ public class BonusPaymentRepositoryTests
         await repo.SaveAsync(new BonusPayment { ID = 2, BonusPay = 20, DistributorID = 2 });
         await db.CommitAsync();
 
-        var all = (await repo.SetAsync()).ToList();
+        var all = repo.Set().ToList();
 
         all.Count.ShouldBe(2);
     }

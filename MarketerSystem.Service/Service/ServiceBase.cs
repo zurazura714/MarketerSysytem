@@ -1,5 +1,6 @@
 using MarketerSystem.Abstractions.Repository;
 using MarketerSystem.Abstractions.Service;
+using Microsoft.EntityFrameworkCore;
 
 namespace MarketerSystem.Service.Service;
 
@@ -18,7 +19,7 @@ public abstract class ServiceBase<TEntity, TRepository> : IServiceBase<TEntity>
 
     public virtual Task<TEntity?> FetchAsync(int id) => _repository.FetchAsync(id);
 
-    public virtual Task<IEnumerable<TEntity>> SetAsync() => _repository.SetAsync();
+    public virtual Task<List<TEntity>> ListAsync() => _repository.Set().ToListAsync();
 
     public virtual async Task SaveAsync(TEntity entity)
     {

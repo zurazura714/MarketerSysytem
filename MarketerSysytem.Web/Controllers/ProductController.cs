@@ -14,7 +14,7 @@ public class ProductController(IMapper mapper, IProductService productService) :
     [HttpHead]
     public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsAsync()
     {
-        var products = await productService.SetAsync();
+        var products = await productService.ListAsync();
         return Ok(mapper.Map<IEnumerable<ProductDTO>>(products));
     }
 
@@ -66,7 +66,7 @@ public class ProductController(IMapper mapper, IProductService productService) :
         {
             return NotFound();
         }
-        await productService.DeleteAsync(id);
+        await productService.DeleteAsync(product);
         return NoContent();
     }
 }

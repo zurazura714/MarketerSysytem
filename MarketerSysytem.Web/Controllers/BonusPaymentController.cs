@@ -11,10 +11,10 @@ namespace MarketerSysytem.Web.Controllers;
 public class BonusPaymentController(IMapper mapper, IBonusPaymentService bonusPaymentService) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> GenerateAsync([FromQuery] PaymentParameters parameters)
+    public async Task<ActionResult<IEnumerable<BonusPaymentDTO>>> GenerateAsync([FromQuery] PaymentParameters parameters)
     {
-        await bonusPaymentService.GenerateBonusPaymentsForPeriodAsync(parameters);
-        return Created();
+        var created = await bonusPaymentService.GenerateBonusPaymentsForPeriodAsync(parameters);
+        return Ok(mapper.Map<IEnumerable<BonusPaymentDTO>>(created));
     }
 
     [HttpGet]

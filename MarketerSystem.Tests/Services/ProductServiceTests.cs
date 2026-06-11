@@ -1,11 +1,18 @@
 using MarketerSystem.Abstractions.Repository;
 using MarketerSystem.Domain.Model;
+using MarketerSystem.Repository.Repository;
 using MarketerSystem.Service.Service;
+using MarketerSystem.Tests.Infrastructure;
 using Moq;
 using Shouldly;
 
 namespace MarketerSystem.Tests.Services;
 
+/// <summary>
+/// Mock-based tests pin the ServiceBase orchestration contract
+/// (repository call + unit-of-work commit); ListAsync runs on EF InMemory
+/// because it materializes a real queryable.
+/// </summary>
 public class ProductServiceTests
 {
     private readonly Mock<IUnitOfWork> _uow = new();
@@ -29,20 +36,18 @@ public class ProductServiceTests
     }
 
     [Fact]
-    public async Task SetAsync_ReturnsAllProductsFromRepository()
+    public async Task ListAsync_ReturnsAllPersistedProducts()
     {
-        var products = new List<Product>
-        {
-            new() { ID = 1, Name = "Pen", Price = 10 },
-            new() { ID = 2, Name = "Notebook", Price = 25 }
-        };
-        _repo.Setup(r => r.SetAsync()).ReturnsAsync(products);
+        using var db = InMemoryContextFactory.Create();
+        var service = new ProductService(db, new ProductRepository(db));
+        db.Products.AddRange(
+            new Product { ID = 1, Name = "Pen", Price = 10 },
+            new Product { ID = 2, Name = "Notebook", Price = 25 });
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = (await _sut.SetAsync()).ToList();
+        var result = await service.ListAsync();
 
         result.Count.ShouldBe(2);
-        result[0].ShouldBeSameAs(products[0]);
-        result[1].ShouldBeSameAs(products[1]);
     }
 
     [Fact]
@@ -65,5 +70,28 @@ public class ProductServiceTests
 
         _repo.Verify(r => r.DeleteAsync(product), Times.Once);
         _uow.Verify(u => u.CommitAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ById_WhenEntityExists_DeletesAndCommits()
+    {
+        var product = new Product { ID = 1, Name = "Pen", Price = 10 };
+        _repo.Setup(r => r.FetchAsync(1)).ReturnsAsync(product);
+
+        await _sut.DeleteAsync(1);
+
+        _repo.Verify(r => r.DeleteAsync(product), Times.Once);
+        _uow.Verify(u => u.CommitAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ById_WhenEntityMissing_DoesNotCommit()
+    {
+        _repo.Setup(r => r.FetchAsync(404)).ReturnsAsync((Product)null!);
+
+        await _sut.DeleteAsync(404);
+
+        _repo.Verify(r => r.DeleteAsync(It.IsAny<Product>()), Times.Never);
+        _uow.Verify(u => u.CommitAsync(), Times.Never);
     }
 }
