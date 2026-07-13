@@ -362,12 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Claude Code knowledge files — local-only project context, not for public portfolio
-CLAUDE.md
-**/CLAUDE.md
-CLAUDE-*.md
-**/CLAUDE-*.md
-docs/claude/
-
 # Superpowers visual-companion working files (local brainstorm sessions)
 .superpowers/
