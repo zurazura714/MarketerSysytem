@@ -1,25 +1,34 @@
-# Docker Learning Workbook — MarketerSystem
+# Docker Learning Guide — MarketerSystem (self-study edition)
 
-> Personal learning file — **committed to the repo on purpose** (learning-in-public, user request 2026-07-13).
+> Committed to the repo on purpose (learning-in-public). Rewritten 2026-07-13 as a **standalone
+> follow-along guide** — you work in your own terminal (PowerShell), no AI session needed.
 > Started: 2026-07-07. Docker Desktop 29.4.3 / Compose v5.1.3 installed and verified.
 >
-> **Progress tracking (standing rule, user request):** the user learns across many different sessions,
-> so Claude MUST keep this file current *as progress happens* — tick `[x]` boxes and append a session-log
-> row whenever an item is completed, without being asked. When the user says "docker learning",
-> read this file and resume at the first unchecked item, in coach mode.
+> **Progress tracking:** tick `[x]` yourself as you go, add a session-log row at the bottom.
+> If you bring this to Claude/Cowork, say "docker learning" — it resumes at the first unchecked item.
 
-## The Method (rules for every stage)
+## How to use this guide
 
-1. **You type, Claude coaches.** Run commands with the `!` prefix in Claude Code so the output lands in the conversation.
-2. **Predict before you run.** Say out loud what you expect the command to do. Compare with reality. The gap is the lesson.
-3. **You draft every file first.** Dockerfile and compose files are written by you, reviewed by Claude like a PR. The spec at `docs/superpowers/specs/2026-06-11-docker-design.md` is the answer key — look only *after* your attempt.
-4. **Break things on purpose.** Every stage ends with a controlled failure and you diagnosing it.
-5. One stage per sitting is fine. 20–60 min each.
+1. **Predict before you run.** Before every command, say (or write) what you expect. The gap between prediction and reality is the lesson.
+2. **Type commands, don't paste.** Muscle memory matters.
+3. **Draft every file yourself first** (Dockerfile, compose). The answer key is `docs/superpowers/specs/2026-06-11-docker-design.md` — look only *after* your attempt, then reconcile differences.
+4. Every stage ends with a **controlled failure** you diagnose yourself, then a self-quiz (answers at the end of each stage — don't peek early).
+5. One stage per sitting, 20–60 min each.
 
-## Debugging loop (memorize this order)
+## The debugging loop (memorize — use in this order every time something is wrong)
 
-`docker ps -a` → `docker logs <name>` → `docker inspect <name>` → `docker exec -it <name> bash`
-(what exists? → what did it say? → how is it configured? → look inside)
+```
+docker ps -a          # what exists, and what state is it in?
+docker logs <name>    # what did it say before it died?
+docker inspect <name> # how is it actually configured (env, ports, mounts)?
+docker exec -it <name> bash   # go inside and look around
+```
+
+## Current state (as of 2026-07-13)
+
+- Image `mcr.microsoft.com/mssql/server:2022-latest` is pulled.
+- Container **`learn-sql` was created and started** — SA password is literally `<ZuraTest1>` **including the angle brackets** (a copy-paste accident kept as a lesson: quotes protect `<>` from the shell, so the brackets became part of the password). Type the brackets when connecting.
+- A `hello-world` container was run and removed (`docker rm wonderful_bhabha`).
 
 ---
 
@@ -27,79 +36,147 @@
 
 **Goal:** feel the difference between image and container; ports and env vars.
 
-- `[x]` `docker run hello-world` — predict first: what will Docker do if the image isn't local? *(done 2026-07-08: saw pull-then-run, layer downloads)*
-- `[ ]` Run SQL Server manually (type it, don't paste):
+- `[x]` `docker run hello-world` *(done 2026-07-08: docker run = pull + create + start; layer downloads)*
+- `[x]` `docker ps` vs `docker ps -a` *(done 2026-07-08: running vs everything; `Exited (0)` = clean exit; auto-generated names; `docker rm` removes)*
+- `[x]` Run SQL Server manually *(done 2026-07-13, container `learn-sql`)*:
   ```
-  docker run --name learn-sql -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=<Strong!Pass1>" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
+  docker run --name learn-sql -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=<YourStrong!Pass1>" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
   ```
-  Explain to Claude what every flag does before running.
-- `[x]` `docker ps` vs `docker ps -a` — what's the difference? *(done 2026-07-08: running vs exists; Exited (0); auto-generated names; removed with docker rm)*
-- `[ ]` `docker logs learn-sql` — find the line proving SQL Server is ready.
-- `[ ]` Connect SSMS to `localhost,1433` (user `sa`) — create a database `LearnDB` with one table, one row.
-- `[ ]` **Controlled failure:** run the same command again with a weak password (`abc`). Diagnose why the container exits using the debugging loop. (SQL Server enforces password complexity — the container just dies.)
-- `[ ]` Quiz me: image vs container; what `-d` does; where the container's data lives right now.
+  **What each flag does:**
+  - `--name learn-sql` — human-chosen container name (otherwise Docker invents one like `wonderful_bhabha`); used in every later command (`logs`, `rm`, `exec`).
+  - `-e KEY=VALUE` — sets an environment variable **inside** the container. This is how containers are configured — same image, different behavior. `ACCEPT_EULA=Y` accepts the license; `MSSQL_SA_PASSWORD` sets the `sa` login password.
+  - `-p 1433:1433` — port publishing, format `host:container`. Traffic to `localhost:1433` on Windows is forwarded to port 1433 inside the container. Without `-p`, the container runs but nothing outside can reach it.
+  - `-d` — detached: runs in the background and prints the container ID instead of tying up your terminal with SQL Server's output.
+- `[ ]` Verify it's running: `docker ps` — expect STATUS `Up ...` and PORTS `0.0.0.0:1433->1433/tcp`. It also appears in Docker Desktop → Containers.
+- `[ ]` `docker logs learn-sql` — scroll for the line proving readiness:
+  `SQL Server is now ready for client connections. This is an informational message...`
+  (If instead the container is gone from `docker ps`, run the debugging loop — most likely the password failed complexity and the process exited.)
+- `[ ]` Connect **SSMS** → server name `localhost,1433` (comma, not colon), SQL auth, user `sa`, password `<ZuraTest1>` **with the brackets**. Create database `LearnDB`, one table, insert one row:
+  ```sql
+  CREATE DATABASE LearnDB;
+  USE LearnDB;
+  CREATE TABLE Note (Id INT PRIMARY KEY, Text NVARCHAR(100));
+  INSERT INTO Note VALUES (1, N'hello from a container');
+  ```
+- `[ ]` **Controlled failure:** run a second container with a weak password:
+  ```
+  docker run --name weak-sql -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=abc" -p 1434:1433 -d mcr.microsoft.com/mssql/server:2022-latest
+  ```
+  `docker run` succeeds (prints an ID!) but seconds later the container dies. Prove it with the debugging loop: `docker ps -a` shows `Exited (1)`, `docker logs weak-sql` shows the password-complexity error. Lesson: **`-d` returning an ID only means "started", not "healthy"** — always check logs. Clean up: `docker rm weak-sql`.
+- `[ ]` Self-quiz (answers below — try first):
+  1. Image vs container?
+  2. What does `-d` change, and what does it NOT guarantee?
+  3. Where does LearnDB's data physically live right now?
+
+<details><summary>Stage 0 quiz answers</summary>
+
+1. Image = read-only template (layers, downloaded once). Container = a running (or stopped) *instance* of an image with its own writable layer. One image → many containers.
+2. `-d` detaches — the container runs in the background. It does NOT guarantee the process inside is healthy; it can die one second later. Check `docker ps` + `logs`.
+3. In the container's **writable layer** (inside Docker Desktop's VM disk). It is deleted forever when the container is removed — that's Stage 1's whole point.
+</details>
 
 ## Stage 1 — Volumes: watch data die, then survive `[ ]`
 
 **Goal:** why volumes exist — felt, not read.
 
-- `[ ]` `docker rm -f learn-sql`, start it again, look for `LearnDB` in SSMS. Gone. Why?
-- `[ ]` Restart with `-v learn-sql-data:/var/opt/mssql`. Recreate `LearnDB`. `rm -f` and start again **with the same -v**. Data survives.
-- `[ ]` `docker volume ls`, `docker volume inspect learn-sql-data` — where does Windows actually keep this?
-- `[ ]` Cleanup: `docker rm -f learn-sql`, `docker volume rm learn-sql-data`.
-- `[ ]` Quiz: container filesystem vs volume; when does `docker rm` lose data and when not.
+- `[ ]` Kill and recreate: `docker rm -f learn-sql`, run the same `docker run` again, connect SSMS → **LearnDB is gone.** Why? The writable layer died with the container.
+- `[ ]` Recreate **with a volume** (one new flag):
+  ```
+  docker run --name learn-sql -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=<ZuraTest1>" -p 1433:1433 -v learn-sql-data:/var/opt/mssql -d mcr.microsoft.com/mssql/server:2022-latest
+  ```
+  `-v name:/path` mounts a Docker-managed volume over the container path where SQL Server keeps `.mdf`/`.ldf` files. Recreate LearnDB. Then `docker rm -f learn-sql` and run again **with the same `-v`** → LearnDB survives.
+- `[ ]` `docker volume ls` and `docker volume inspect learn-sql-data` — note the Mountpoint (it lives inside Docker Desktop's Linux VM, not directly on C:).
+- `[ ]` Cleanup: `docker rm -f learn-sql` then `docker volume rm learn-sql-data`.
+- `[ ]` Self-quiz: when does `docker rm` lose data and when not? What's the difference between the container filesystem and a volume?
+
+<details><summary>Stage 1 quiz answers</summary>
+
+`docker rm` destroys the container's writable layer — anything written to a **volume-mounted path** survives because the volume is a separate object with its own lifecycle (`docker volume rm` deletes it). Container FS = ephemeral, tied to the container; volume = persistent, attachable to the next container.
+</details>
 
 ## Stage 2 — Naive Dockerfile for the API `[ ]`
 
 **Goal:** build context, layers, COPY, ENTRYPOINT — by writing a deliberately crude version.
 
-- `[ ]` Write a **single-stage** Dockerfile yourself (SDK image, `COPY . .`, `dotnet publish`, `ENTRYPOINT`). No peeking at the spec.
-- `[ ]` Create a minimal `.dockerignore` (`**/bin`, `**/obj`, `.git/`) — first build without it, then with it; compare build context size in the build output.
-- `[ ]` `docker build -t marketer-api:naive .` — read every line of output; ask Claude about anything unclear.
-- `[ ]` `docker image ls` — note the size (expect ~1 GB+). Write it here: ______
-- `[ ]` Run it: `docker run -p 8080:8080 marketer-api:naive` — **it will crash or misbehave** (no database reachable). Diagnose with logs; understand *why* (LocalDB connection string points nowhere inside a container).
-- `[ ]` Quiz: what is the build context; why `.dockerignore` matters; what a layer is.
+- `[ ]` Write a **single-stage** `Dockerfile` at the repo root yourself. Skeleton to aim for (fill in, don't paste): FROM the .NET **SDK** image (`mcr.microsoft.com/dotnet/sdk:10.0`) → `WORKDIR /src` → `COPY . .` → `RUN dotnet publish MarketerSysytem.Web -c Release -o /app` → `WORKDIR /app` → `ENTRYPOINT ["dotnet", "MarketerSysytem.Web.dll"]`. No peeking at the spec.
+- `[ ]` First build **without** a `.dockerignore`: `docker build -t marketer-api:naive .` — note the "transferring context" size in the first output lines (it ships `bin/`, `obj/`, `.git/` — huge). Then create `.dockerignore` (`**/bin`, `**/obj`, `.git/`) and rebuild — compare context size.
+- `[ ]` Read every line of the build output — each `RUN`/`COPY` = one **layer**.
+- `[ ]` `docker image ls` — write the naive size here: ______ (expect ~1 GB+, because the SDK image ships compilers you don't need at runtime).
+- `[ ]` Run it: `docker run --rm -p 8080:8080 -e ASPNETCORE_URLS=http://+:8080 marketer-api:naive` — **it will crash**: the connection string points at `(localdb)\mssqllocaldb`, which doesn't exist inside a Linux container. Read the exception in the output and understand it. That's Stage 4's problem to solve.
+- `[ ]` Self-quiz: what exactly is "the build context"? Why does `.dockerignore` matter? What is a layer?
+
+<details><summary>Stage 2 quiz answers</summary>
+
+Build context = the directory tree sent to the Docker engine when you run `docker build .` — `COPY` can only see files inside it. `.dockerignore` shrinks it (faster builds, no secrets/junk in the image, better cache behavior). A layer = the filesystem diff produced by one Dockerfile instruction; layers are cached and reused when their inputs haven't changed.
+</details>
 
 ## Stage 3 — Multi-stage + chiseled: make it good `[ ]`
 
 **Goal:** layer caching and image size — measured, not believed.
 
-- `[ ]` Rewrite as multi-stage: SDK stage builds, `aspnet:10.0-noble-chiseled` runs. Your draft first, then compare against the spec's Dockerfile and reconcile differences.
-- `[ ]` Understand the csproj-copy-then-restore trick: change one line of C# code, rebuild, watch restore come from cache. Then touch a csproj, rebuild, watch restore re-run.
-- `[ ]` Measure: naive size ______ vs multi-stage size ______ (expect ~120–250 MB). Rebuild time after code-only change: ______
-- `[ ]` Quiz: why copy csprojs before source; what chiseled means (no shell — try `docker exec -it <c> bash`, watch it fail); why `/p:UseAppHost=false`.
+- `[ ]` Rewrite as **multi-stage**: stage 1 `FROM sdk:10.0 AS build` (restore + publish with `/p:UseAppHost=false`), stage 2 `FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled` + `COPY --from=build`. Your draft first, then compare with the spec's Dockerfile and reconcile every difference.
+- `[ ]` The **csproj-copy-then-restore trick**: copy only `Directory.Build.props`, `Directory.Packages.props` and the 7 `.csproj` files, run `dotnet restore`, and *only then* `COPY . .`. Test it: change one line of C#, rebuild → restore layer says `CACHED`. Touch a csproj, rebuild → restore re-runs. Watch it happen.
+- `[ ]` Measure: naive ______ vs multi-stage ______ (expect ~120–250 MB). Rebuild time after a code-only change: ______
+- `[ ]` Prove "chiseled = no shell": `docker exec -it <container> bash` → fails, there is no bash. Smaller attack surface, smaller image.
+- `[ ]` Self-quiz: why copy csprojs before source? Why `/p:UseAppHost=false`? What does chiseled remove?
+
+<details><summary>Stage 3 quiz answers</summary>
+
+Csprojs change rarely, source changes constantly — splitting them lets the expensive `dotnet restore` layer stay cached across code edits. `/p:UseAppHost=false` skips the native launcher executable (useless in a container; `ENTRYPOINT ["dotnet", "x.dll"]` runs it). Chiseled Ubuntu strips shell, package manager, and root user — only the runtime + your app remain.
+</details>
 
 ## Stage 4 — Compose: the real deliverable `[ ]`
 
-**Goal:** container DNS, healthchecks, env-var config. This stage's output IS the Month-1 roadmap deliverable.
+**Goal:** container DNS, healthchecks, env-var config. **This stage's output IS the Month-1 roadmap deliverable.**
 
-- `[ ]` Write `docker-compose.yml` yourself: `db` (SQL 2022 + volume + healthcheck) and `web` (build: ., depends_on healthy, env vars). Compare with spec afterward.
-- `[ ]` Create `.env` + `.env.example`; confirm `.env` is gitignored (`git check-ignore .env`).
-- `[ ]` Understand the connection string: why `Server=db,1433` works (compose network DNS) and why `ConnectionStrings__MarketerDBContext` (double underscore) overrides appsettings.json.
-- `[ ]` `docker compose up --build` — watch the ordering: db → healthy → web → migrations apply.
-- `[ ]` Verify: `/healthz` 200, `/scalar/v1` renders, `GET /api/Distributor` returns the 2 seeded distributors.
-- `[ ]` `docker compose down -v` then `up` again — clean re-seed proves migrations work from scratch. (Note: our deterministic-seed fix is what makes this work in UTC containers — ask Claude for the war story.)
-- `[ ]` Quiz: what compose adds over `docker run`; service name vs container name; healthcheck vs depends_on.
+- `[ ]` Remove `app.UseHttpsRedirection()` from `Program.cs` (container is HTTP-only; TLS terminates at the platform edge in Month 2).
+- `[ ]` Write `docker-compose.yml` yourself: service `db` (SQL 2022 image, volume, `MSSQL_SA_PASSWORD=${DB_PASSWORD}`, healthcheck using `sqlcmd -C`), service `web` (`build: .`, `depends_on: db: condition: service_healthy`, ports `8080:8080`). Compare with the spec afterward.
+- `[ ]` Create `.env` (real password) + `.env.example` (placeholder). Add `.env` to `.gitignore`; verify with `git check-ignore .env`.
+- `[ ]` Understand the connection string override:
+  `ConnectionStrings__MarketerDBContext=Server=db,1433;Database=MarketerDB;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True`
+  — `db` resolves via the compose network's internal DNS (service name = hostname); the double underscore `__` is ASP.NET Core's env-var syntax for nested config keys, and env vars override `appsettings.json`.
+- `[ ]` `docker compose up --build` — watch the ordering: db starts → healthcheck passes → web starts → EF migrations apply + seed.
+- `[ ]` Verify: `http://localhost:8080/healthz` = 200, `/scalar/v1` renders, `GET /api/Distributor` returns the 2 seeded distributors.
+- `[ ]` `docker compose down -v` then `up` again — clean re-seed from scratch proves migrations work. (This only works because the seeds are deterministic with explicit `TimeSpan.Zero` offsets — the war story is in `CLAUDE-docker.md`.)
+- `[ ]` Self-quiz: what does compose add over `docker run`? Service name vs container name? Healthcheck vs `depends_on`?
+
+<details><summary>Stage 4 quiz answers</summary>
+
+Compose = declarative multi-container: one file defines services, network, volumes, env — `up`/`down` manage the whole stack, and services get DNS names. Service name (`db`) is the stable network hostname; container name is the runtime instance label. `depends_on` alone only orders *starting*; with `condition: service_healthy` it waits for the healthcheck to actually pass — without it, web races SQL Server's ~15 s startup and crashes.
+</details>
 
 ## Stage 5 — Break & fix drills `[ ]`
 
 **Goal:** the debugging loop becomes reflex. Do these cold, no notes.
 
 - `[ ]` Sabotage 1: wrong `DB_PASSWORD` in `.env`. Predict the failure mode, then diagnose from scratch.
-- `[ ]` Sabotage 2: `docker stop <db>` while web is running, hit `/api/Distributor` and `/healthz`. What breaks, what does the health check report?
-- `[ ]` Sabotage 3: comment out the healthcheck, `docker compose up` from cold. Race condition — web starts before SQL is ready. What error appears?
-- `[ ]` Sabotage 4 (Claude picks): Claude secretly breaks one thing in compose/env; you diagnose it live.
-- `[ ]` Housekeeping: `docker system df`, `docker system prune` — understand what's safe to delete.
+- `[ ]` Sabotage 2: `docker stop` the db container while web runs; hit `/api/Distributor` and `/healthz`. What breaks, what does the health check report?
+- `[ ]` Sabotage 3: comment out the healthcheck, `docker compose up` from cold. Race condition — what error appears in web's logs?
+- `[ ]` Housekeeping: `docker system df`, then `docker system prune` — read the confirmation prompt carefully; understand what's safe to delete (stopped containers, dangling images, unused networks — NOT named volumes unless `--volumes`).
 
 ## Graduation checklist
 
-- `[ ]` Can explain image/container/layer/volume/network to a rubber duck without notes.
-- `[ ]` Can rebuild the whole stack from `git clone` + `.env` in one command.
-- `[ ]` Commit the Docker artifacts (Dockerfile, compose, .dockerignore, .env.example, README section) — Month 1 done.
-- `[ ]` Tell Claude to update CLAUDE.md + CLAUDE-docker.md with what shipped.
+- `[ ]` Explain image/container/layer/volume/network to a rubber duck without notes.
+- `[ ]` Rebuild the whole stack from `git clone` + `cp .env.example .env` in one command.
+- `[ ]` Commit the Docker artifacts (Dockerfile, docker-compose.yml, .dockerignore, .env.example, README "Run with Docker" section) — **Month 1 done.**
+- `[ ]` Update CLAUDE.md + CLAUDE-docker.md with what shipped (tell Claude, or do it yourself).
+
+## Command cheat sheet
+
+```
+docker ps / ps -a                 running / all containers
+docker logs -f <name>             follow logs
+docker exec -it <name> bash       shell inside (not on chiseled)
+docker rm -f <name>               force-remove container
+docker image ls / volume ls       list images / volumes
+docker build -t name:tag .        build image from Dockerfile
+docker compose up --build / down -v   stack up (rebuild) / down (+wipe volumes)
+docker system df / prune          disk usage / cleanup
+```
 
 ## Session log
 
 | Date | Stage | Notes / aha-moments |
 |---|---|---|
-| 2026-07-08 | 0 (in progress) | docker run = pull+create+start; container lives as long as its process; ps vs ps -a; Exited (0) = clean exit code. Next: run SQL Server with --name/-e/-p/-d (flag explanations pending). |
+| 2026-07-08 | 0 (in progress) | docker run = pull+create+start; container lives as long as its process; ps vs ps -a; Exited (0) = clean exit code. |
+| 2026-07-13 | 0 (in progress) | learn-sql SQL Server container created (pull ≈1.5 GB, container only appears after pull completes). Password literally `<ZuraTest1>` with brackets — quotes protected `<>` from the shell. Guide rewritten for self-study (token saving); flags explained inline. Next: docker ps verify → logs ready-line → SSMS + LearnDB → weak-password drill → quiz. |
