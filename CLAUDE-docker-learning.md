@@ -4,8 +4,10 @@
 > follow-along guide** — you work in your own terminal (PowerShell), no AI session needed.
 > Started: 2026-07-07. Docker Desktop 29.4.3 / Compose v5.1.3 installed and verified.
 >
-> **Progress tracking:** tick `[x]` yourself as you go, add a session-log row at the bottom.
-> If you bring this to Claude/Cowork, say "docker learning" — it resumes at the first unchecked item.
+> **Progress tracking:** tick `[x]` yourself as you go, add a session-log row at the bottom — OR just
+> tell any Claude session **"docker learning, I finished X"** and it will tick the boxes, log the date,
+> and commit for you (standing rule in CLAUDE.md). Saying "docker learning" alone resumes at the first
+> unchecked item.
 
 ## How to use this guide
 

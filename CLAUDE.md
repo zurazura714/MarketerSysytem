@@ -4,7 +4,7 @@ ASP.NET Core Web API tracking **distributors**, **product sales**, and **multi-l
 
 **Supplementary knowledge files** (committed to the repo — user decision 2026-07-13, learning-in-public): `CLAUDE-docker.md` (containerization design + container-critical gotchas), `CLAUDE-microservices.md` (decomposition analysis + agreed Month-4 direction: grow functionality, then staged split starting with the payout engine), `CLAUDE-docker-learning.md` (the user's hands-on Docker learning guide — rewritten 2026-07-13 as a **self-study** document: the user works through it in their own terminal to save tokens; expected outputs and quiz answers are inline. If they say "docker learning", resume at the first unchecked item; still never write Docker files for them — they draft, Claude reviews).
 
-**Standing rule (user request 2026-07-13):** the user learns across many separate sessions — update `CLAUDE-docker-learning.md` (tick checkboxes + append session-log rows) **immediately as progress happens**, without being asked, so any future session can resume from the file alone. Keep all knowledge files current whenever facts change.
+**Standing rule (user request 2026-07-13):** the user learns across many separate sessions and studies Docker on their own between sessions. When they say **"docker learning, I finished X"** (or similar), tick the matching `[x]` checkboxes in `CLAUDE-docker-learning.md`, append a session-log row with the date and any aha-moments they mention, and commit — without being asked. Any progress made *during* a session is recorded immediately too. Keep all knowledge files current whenever facts change.
 
 ## Stack
 
