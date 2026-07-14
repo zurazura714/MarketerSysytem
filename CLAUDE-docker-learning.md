@@ -26,15 +26,17 @@ docker inspect <name> # how is it actually configured (env, ports, mounts)?
 docker exec -it <name> bash   # go inside and look around
 ```
 
-## Current state (as of 2026-07-13)
+## Current state (as of 2026-07-14)
 
-- Image `mcr.microsoft.com/mssql/server:2022-latest` is pulled.
-- Container **`learn-sql` was created and started** — SA password is literally `<ZuraTest1>` **including the angle brackets** (a copy-paste accident kept as a lesson: quotes protect `<>` from the shell, so the brackets became part of the password). Type the brackets when connecting.
-- A `hello-world` container was run and removed (`docker rm wonderful_bhabha`).
+- **Stage 0 complete** (finished 2026-07-14). Now working across **two PCs** — the original machine plus a second one (Windows 11).
+- Image `mcr.microsoft.com/mssql/server:2022-latest` pulled on both machines (re-pulled on the new PC 2026-07-14, ~1.5 GB).
+- Container **`learn-sql` exists on the new PC (ID `6bce5325…`), currently STOPPED.** Resume it with **`docker start learn-sql`** — *not* `docker run` (run only ever creates a *new* container). Exact SA password on this container wasn't captured this session; if a connect fails, `docker rm learn-sql` and recreate with a known one.
+- `hello-world` run on the new PC as container `practical_murdock` (2026-07-14).
+- (Old PC, 2026-07-13) its `learn-sql` had SA password literally `<ZuraTest1>` **with the angle brackets** — copy-paste accident kept as a lesson: quotes protected `<>` from the shell, so the brackets became part of the password.
 
 ---
 
-## Stage 0 — Containers by hand `[ ]`
+## Stage 0 — Containers by hand `[x]`
 
 **Goal:** feel the difference between image and container; ports and env vars.
 
@@ -49,23 +51,23 @@ docker exec -it <name> bash   # go inside and look around
   - `-e KEY=VALUE` — sets an environment variable **inside** the container. This is how containers are configured — same image, different behavior. `ACCEPT_EULA=Y` accepts the license; `MSSQL_SA_PASSWORD` sets the `sa` login password.
   - `-p 1433:1433` — port publishing, format `host:container`. Traffic to `localhost:1433` on Windows is forwarded to port 1433 inside the container. Without `-p`, the container runs but nothing outside can reach it.
   - `-d` — detached: runs in the background and prints the container ID instead of tying up your terminal with SQL Server's output.
-- `[ ]` Verify it's running: `docker ps` — expect STATUS `Up ...` and PORTS `0.0.0.0:1433->1433/tcp`. It also appears in Docker Desktop → Containers.
-- `[ ]` `docker logs learn-sql` — scroll for the line proving readiness:
+- `[x]` Verify it's running: `docker ps` — expect STATUS `Up ...` and PORTS `0.0.0.0:1433->1433/tcp`. It also appears in Docker Desktop → Containers.
+- `[x]` `docker logs learn-sql` — scroll for the line proving readiness:
   `SQL Server is now ready for client connections. This is an informational message...`
   (If instead the container is gone from `docker ps`, run the debugging loop — most likely the password failed complexity and the process exited.)
-- `[ ]` Connect **SSMS** → server name `localhost,1433` (comma, not colon), SQL auth, user `sa`, password `<ZuraTest1>` **with the brackets**. Create database `LearnDB`, one table, insert one row:
+- `[x]` Connect **SSMS** → server name `localhost,1433` (comma, not colon), SQL auth, user `sa`, password `<ZuraTest1>` **with the brackets**. Create database `LearnDB`, one table, insert one row:
   ```sql
   CREATE DATABASE LearnDB;
   USE LearnDB;
   CREATE TABLE Note (Id INT PRIMARY KEY, Text NVARCHAR(100));
   INSERT INTO Note VALUES (1, N'hello from a container');
   ```
-- `[ ]` **Controlled failure:** run a second container with a weak password:
+- `[x]` **Controlled failure:** run a second container with a weak password:
   ```
   docker run --name weak-sql -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=abc" -p 1434:1433 -d mcr.microsoft.com/mssql/server:2022-latest
   ```
   `docker run` succeeds (prints an ID!) but seconds later the container dies. Prove it with the debugging loop: `docker ps -a` shows `Exited (1)`, `docker logs weak-sql` shows the password-complexity error. Lesson: **`-d` returning an ID only means "started", not "healthy"** — always check logs. Clean up: `docker rm weak-sql`.
-- `[ ]` Self-quiz (answers below — try first):
+- `[x]` Self-quiz (answers below — try first):
   1. Image vs container?
   2. What does `-d` change, and what does it NOT guarantee?
   3. Where does LearnDB's data physically live right now?
@@ -182,3 +184,4 @@ docker system df / prune          disk usage / cleanup
 |---|---|---|
 | 2026-07-08 | 0 (in progress) | docker run = pull+create+start; container lives as long as its process; ps vs ps -a; Exited (0) = clean exit code. |
 | 2026-07-13 | 0 (in progress) | learn-sql SQL Server container created (pull ≈1.5 GB, container only appears after pull completes). Password literally `<ZuraTest1>` with brackets — quotes protected `<>` from the shell. Guide rewritten for self-study (token saving); flags explained inline. Next: docker ps verify → logs ready-line → SSMS + LearnDB → weak-password drill → quiz. |
+| 2026-07-14 | **0 — complete** ✅ | Stage 0 done on the 2nd PC (Windows 11); it was fun. Aha-moments: **image = class, container = instance** (one image → many containers; a container adds its own writable layer). **`docker run` always creates a NEW container** — to bring back a stopped one use **`docker start`**, never `run` (hit "image not found" from naming a container as an image, then a name-conflict on re-create). **Flags are per-subcommand:** `-a` = `--all` on `ps` but `--attach` on `run`/`start` (on `run`, `-a` even eats the next word as a stream name). **`-d`** = background; a returned container ID means "started", NOT "healthy". **`docker exec … bash`** needs the container *running* AND the image to *ship a shell* — fails on hello-world (`FROM scratch`) and chiseled. **Data in the writable layer survives stop/start but dies on `docker rm`** → the hook into Stage 1 (volumes). Quiz passed. |
