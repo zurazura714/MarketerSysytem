@@ -28,9 +28,9 @@ docker exec -it <name> bash   # go inside and look around
 
 ## Current state (as of 2026-07-14)
 
-- **Stage 0 complete** (finished 2026-07-14). Now working across **two PCs** — the original machine plus a second one (Windows 11).
+- **Stages 0 and 1 complete** (both finished 2026-07-14). Working across **two PCs** — the original machine plus a second one (Windows 11).
 - Image `mcr.microsoft.com/mssql/server:2022-latest` pulled on both machines (re-pulled on the new PC 2026-07-14, ~1.5 GB).
-- Container **`learn-sql` exists on the new PC (ID `6bce5325…`), currently STOPPED.** Resume it with **`docker start learn-sql`** — *not* `docker run` (run only ever creates a *new* container). Exact SA password on this container wasn't captured this session; if a connect fails, `docker rm learn-sql` and recreate with a known one.
+- Stage 1 exercised the volume lifecycle: `docker rm` wipes the writable layer (bye `LearnDB`), while `-v learn-sql-data:/var/opt/mssql` mounts a volume over SQL Server's data dir so the data survives. Exact current container/volume state not captured — check with `docker ps -a` and `docker volume ls`.
 - `hello-world` run on the new PC as container `practical_murdock` (2026-07-14).
 - (Old PC, 2026-07-13) its `learn-sql` had SA password literally `<ZuraTest1>` **with the angle brackets** — copy-paste accident kept as a lesson: quotes protected `<>` from the shell, so the brackets became part of the password.
 
@@ -79,19 +79,19 @@ docker exec -it <name> bash   # go inside and look around
 3. In the container's **writable layer** (inside Docker Desktop's VM disk). It is deleted forever when the container is removed — that's Stage 1's whole point.
 </details>
 
-## Stage 1 — Volumes: watch data die, then survive `[ ]`
+## Stage 1 — Volumes: watch data die, then survive `[x]`
 
 **Goal:** why volumes exist — felt, not read.
 
-- `[ ]` Kill and recreate: `docker rm -f learn-sql`, run the same `docker run` again, connect SSMS → **LearnDB is gone.** Why? The writable layer died with the container.
-- `[ ]` Recreate **with a volume** (one new flag):
+- `[x]` Kill and recreate: `docker rm -f learn-sql`, run the same `docker run` again, connect SSMS → **LearnDB is gone.** Why? The writable layer died with the container.
+- `[x]` Recreate **with a volume** (one new flag):
   ```
   docker run --name learn-sql -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=<ZuraTest1>" -p 1433:1433 -v learn-sql-data:/var/opt/mssql -d mcr.microsoft.com/mssql/server:2022-latest
   ```
   `-v name:/path` mounts a Docker-managed volume over the container path where SQL Server keeps `.mdf`/`.ldf` files. Recreate LearnDB. Then `docker rm -f learn-sql` and run again **with the same `-v`** → LearnDB survives.
-- `[ ]` `docker volume ls` and `docker volume inspect learn-sql-data` — note the Mountpoint (it lives inside Docker Desktop's Linux VM, not directly on C:).
-- `[ ]` Cleanup: `docker rm -f learn-sql` then `docker volume rm learn-sql-data`.
-- `[ ]` Self-quiz: when does `docker rm` lose data and when not? What's the difference between the container filesystem and a volume?
+- `[x]` `docker volume ls` and `docker volume inspect learn-sql-data` — note the Mountpoint (it lives inside Docker Desktop's Linux VM, not directly on C:).
+- `[x]` Cleanup: `docker rm -f learn-sql` then `docker volume rm learn-sql-data`.
+- `[x]` Self-quiz: when does `docker rm` lose data and when not? What's the difference between the container filesystem and a volume?
 
 <details><summary>Stage 1 quiz answers</summary>
 
@@ -185,3 +185,4 @@ docker system df / prune          disk usage / cleanup
 | 2026-07-08 | 0 (in progress) | docker run = pull+create+start; container lives as long as its process; ps vs ps -a; Exited (0) = clean exit code. |
 | 2026-07-13 | 0 (in progress) | learn-sql SQL Server container created (pull ≈1.5 GB, container only appears after pull completes). Password literally `<ZuraTest1>` with brackets — quotes protected `<>` from the shell. Guide rewritten for self-study (token saving); flags explained inline. Next: docker ps verify → logs ready-line → SSMS + LearnDB → weak-password drill → quiz. |
 | 2026-07-14 | **0 — complete** ✅ | Stage 0 done on the 2nd PC (Windows 11); it was fun. Aha-moments: **image = class, container = instance** (one image → many containers; a container adds its own writable layer). **`docker run` always creates a NEW container** — to bring back a stopped one use **`docker start`**, never `run` (hit "image not found" from naming a container as an image, then a name-conflict on re-create). **Flags are per-subcommand:** `-a` = `--all` on `ps` but `--attach` on `run`/`start` (on `run`, `-a` even eats the next word as a stream name). **`-d`** = background; a returned container ID means "started", NOT "healthy". **`docker exec … bash`** needs the container *running* AND the image to *ship a shell* — fails on hello-world (`FROM scratch`) and chiseled. **Data in the writable layer survives stop/start but dies on `docker rm`** → the hook into Stage 1 (volumes). Quiz passed. |
+| 2026-07-14 | **1 — complete** ✅ | Volumes. Core lesson: **the container writable layer is ephemeral (dies on `docker rm`); a volume is a separate object with its own lifecycle that survives it.** `-v learn-sql-data:/var/opt/mssql` mounts the volume over SQL Server's data dir, so `LearnDB` outlives the container — re-attach the same volume to a new container and the data reappears. `docker rm` never deletes a *named* volume (need `docker volume rm`). `docker rm -f` = SIGKILL-then-remove (works on a running container); plain `docker rm` refuses a running one. Quiz: Q1 (no `-v` → data lost) ✓; Q2 corrected — a volume doesn't "contain" the container FS, it's *separate* and mounted *into* the container. |
