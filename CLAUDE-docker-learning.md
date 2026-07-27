@@ -105,7 +105,7 @@ docker exec -it <name> bash   # go inside and look around
 - `[ ]` Write a **single-stage** `Dockerfile` at the repo root yourself. Skeleton to aim for (fill in, don't paste): FROM the .NET **SDK** image (`mcr.microsoft.com/dotnet/sdk:10.0`) → `WORKDIR /src` → `COPY . .` → `RUN dotnet publish MarketerSysytem.Web -c Release -o /app` → `WORKDIR /app` → `ENTRYPOINT ["dotnet", "MarketerSysytem.Web.dll"]`. No peeking at the spec.
 - `[ ]` First build **without** a `.dockerignore`: `docker build -t marketer-api:naive .` — note the "transferring context" size in the first output lines (it ships `bin/`, `obj/`, `.git/` — huge). Then create `.dockerignore` (`**/bin`, `**/obj`, `.git/`) and rebuild — compare context size.
 - `[ ]` Read every line of the build output — each `RUN`/`COPY` = one **layer**.
-- `[ ]` `docker image ls` — write the naive size here: ______ (expect ~1 GB+, because the SDK image ships compilers you don't need at runtime).
+- `[ ]` `docker image ls` — write the naive size here: 2.08 GB (expect ~1 GB+, because the SDK image ships compilers you don't need at runtime).
 - `[ ]` Run it: `docker run --rm -p 8080:8080 -e ASPNETCORE_URLS=http://+:8080 marketer-api:naive` — **it will crash**: the connection string points at `(localdb)\mssqllocaldb`, which doesn't exist inside a Linux container. Read the exception in the output and understand it. That's Stage 4's problem to solve.
 - `[ ]` Self-quiz: what exactly is "the build context"? Why does `.dockerignore` matter? What is a layer?
 
